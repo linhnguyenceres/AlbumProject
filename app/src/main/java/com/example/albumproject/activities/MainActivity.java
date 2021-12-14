@@ -2,6 +2,7 @@ package com.example.albumproject.activities;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -77,7 +78,8 @@ public class MainActivity extends Activity {
         btnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "More", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(MainActivity.this,SettingActivity.class));
+//                Toast.makeText(MainActivity.this, "More", Toast.LENGTH_LONG).show();
             }
         });
     }

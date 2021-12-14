@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Album G8</string>
     <string name="txt_date">Ngày</string>
+    <string name="setting_topic">Chủ đề</string>
+    <string name="setting_feedback">Đánh giá chúng tôi</string>
+    <string name="setting_policy">Chính sách bảo mật</string>
+    <string name="setting_term">Điều khoản dịch vụ</string>
 </resources>
