@@ -5,4 +5,6 @@
     <string name="setting_feedback">Đánh giá chúng tôi</string>
     <string name="setting_policy">Chính sách bảo mật</string>
     <string name="setting_term">Điều khoản dịch vụ</string>
+    <string name="setting">Cài đặt</string>
+    <string name="version_app">My Album phiên bản 1.0</string>
 </resources>
