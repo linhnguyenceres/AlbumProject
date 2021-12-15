@@ -107,7 +107,7 @@
         android:layout_marginTop="@dimen/dimen_8"
         android:background="@color/white"
         app:layout_constraintTop_toBottomOf="@id/btnBack"
-        app:tabSelectedTextColor="@color/tabselect">
+        app:tabSelectedTextColor="@color/purple_500">
 
     </com.google.android.material.tabs.TabLayout>
 

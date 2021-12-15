@@ -1,34 +1,39 @@
 package com.example.albumproject.adapters;
 
+import android.app.Activity;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.example.albumproject.R;
 import com.example.albumproject.fragments.FragmentImage;
 import com.example.albumproject.fragments.FragmentListImage;
 import com.example.albumproject.fragments.FragmentOnline;
 
-public class PagerAdapter extends FragmentStatePagerAdapter {
+public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-    PagerAdapter(FragmentManager fragmentManager) {
+    public MyPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
+    }
+
+    public MyPagerAdapter(@NonNull FragmentManager fm, int behavior) {
+        super(fm, behavior);
     }
 
     @Override
     public Fragment getItem(int position) {
-        Fragment frag = null;
         switch (position) {
             case 0:
-                frag = new FragmentImage();
-                break;
+                return new FragmentImage();
             case 1:
-                frag = new FragmentListImage();
-                break;
+                return new FragmentListImage();
             case 2:
-                frag = new FragmentOnline();
-                break;
+                return new FragmentOnline();
+            default:
+                return new FragmentImage();
         }
-        return frag;
     }
 
     @Override
@@ -41,13 +46,13 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         String title = "";
         switch (position) {
             case 0:
-                title = "One";
+                title = "Ảnh";
                 break;
             case 1:
-                title = "Two";
+                title = "Tập ảnh";
                 break;
             case 2:
-                title = "Three";
+                title = "Trực tuyến";
                 break;
         }
         return title;

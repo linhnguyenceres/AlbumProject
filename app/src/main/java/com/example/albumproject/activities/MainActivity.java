@@ -2,20 +2,23 @@ package com.example.albumproject.activities;
 
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.albumproject.R;
+import com.example.albumproject.adapters.MyPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     TextView txtTitle;
     View btnBack;
     View btnSearch;
@@ -39,18 +42,15 @@ public class MainActivity extends Activity {
         btnSearch = (View) findViewById(R.id.btnSearch);
         btnCamera = (View) findViewById(R.id.btnCamera);
         btnMore = (View) findViewById(R.id.btnMore);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
     }
 
     private void addControl() {
-//        viewPager = (ViewPager) findViewById(R.id.viewPager);
-//        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-//        FragmentManager manager = getSupportFragmentManager();
-//        PagerAdapter adapter = new PagerAdapter(manager);
-//        viewPager.setAdapter(adapter);
-//        tabLayout.setupWithViewPager(viewPager);
-//        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-//        tabLayout.setTabsFromPagerAdapter(adapter);//deprecated
-//        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+        MyPagerAdapter adapter = new MyPagerAdapter(getSupportFragmentManager(),
+                FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     void initClick() {
