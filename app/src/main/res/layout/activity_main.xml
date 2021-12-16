@@ -54,6 +54,7 @@
         android:id="@+id/btnMore"
         android:layout_width="@dimen/dimen_40"
         android:layout_height="@dimen/dimen_40"
+        android:onClick="showPopup"
         app:layout_constraintBottom_toBottomOf="@id/imgMore"
         app:layout_constraintLeft_toLeftOf="@id/imgMore"
         app:layout_constraintRight_toRightOf="@id/imgMore"
