@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:textSize="32sp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dimen_20">
+
+        <ImageView
+            android:id="@+id/imageBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_20"
+            android:src="@drawable/ic_arrow_left"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="TODO" />
+
+        <View
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/dimen_40"
+            android:layout_height="@dimen/dimen_40"
+            app:layout_constraintBottom_toBottomOf="@id/imageBack"
+            app:layout_constraintLeft_toLeftOf="@id/imageBack"
+            app:layout_constraintRight_toRightOf="@id/imageBack"
+            app:layout_constraintTop_toTopOf="@id/imageBack" />
+
+        <EditText
+            android:id="@+id/inputSearch"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="@dimen/dimen_40"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/text_size_20sp"
+            android:hint="@string/search_hint"
+            app:layout_constraintBottom_toBottomOf="@id/imageBack"
+            app:layout_constraintLeft_toRightOf="@id/btnBack"
+            app:layout_constraintTop_toTopOf="@id/imageBack"
+            android:inputType="text"
+            android:autofillHints=""
+            app:layout_constraintWidth_percent="0.5"
+            android:background="@drawable/border_custom"
+            ></EditText>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ListView android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>
