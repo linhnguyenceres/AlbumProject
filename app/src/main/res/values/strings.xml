@@ -9,4 +9,5 @@
     <string name="version_app">My Album phiên bản 1.0</string>
     <string name="fragment_image">Ảnh</string>
     <string name="search_hint">Tìm kiếm ảnh</string>
+    <string name="choose">Lựa chọn</string>
 </resources>
