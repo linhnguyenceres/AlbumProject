@@ -1,30 +1,45 @@
 package com.example.albumproject.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.albumproject.R;
+import com.example.albumproject.data.ImageData;
+import com.example.albumproject.models.FileModel;
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 
 
 public class TabImageAdapter extends BaseAdapter {
 
     Context context;
     private LayoutInflater layoutInflater;
-    int[] images;
+//    int[] images;
+    ArrayList<ImageData> listImage;
 
-    public TabImageAdapter(Context context, int[] images){
+
+    public TabImageAdapter(Context context, ArrayList<ImageData> listImage){
         this.context = context;
-        this.images = images;
+        this.listImage = listImage;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return images.length;
+        return listImage.size();
     }
 
     @Override
@@ -34,17 +49,55 @@ public class TabImageAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
+
         return 0;
     }
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        if(view == null){
+        if (view == null) {
             view = layoutInflater.inflate(R.layout.item_tab_image, viewGroup, false);
         }
+        ImageView image = view.findViewById(R.id.imgPicture);
+        File file1 = new  File(listImage.get(i).url);
+        if(file1.exists()){
+            Bitmap bmImg = BitmapFactory.decodeFile(listImage.get(i).url);
+            image.setImageBitmap(Bitmap.createScaledBitmap(bmImg, 200, 200, false));
 
-        ImageView imageView = view.findViewById(R.id.imgPicture);
-        imageView.setBackgroundResource(images[i]);
+        };
         return view;
+    }
+
+
+    class LoadImage extends AsyncTask<Object, Void, Bitmap> {
+
+        private ImageView imv;
+        private String path;
+
+
+        @Override
+        protected Bitmap doInBackground(Object... params) {
+            imv = (ImageView) params[0];
+
+            path = imv.getTag().toString();
+
+            Bitmap bitmap = null;
+            File file = new File(path);
+
+            if (file.exists()) {
+                bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            }
+            return bitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            if (result != null && imv != null) {
+                imv.setVisibility(View.VISIBLE);
+                imv.setImageBitmap(result);
+            } else {
+                imv.setVisibility(View.GONE);
+            }
+        }
     }
 }

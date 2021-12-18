@@ -3,6 +3,7 @@ package com.example.albumproject.models;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 
 import com.example.albumproject.R;

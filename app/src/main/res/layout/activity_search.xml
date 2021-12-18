@@ -46,8 +46,7 @@
             android:inputType="text"
             android:autofillHints=""
             app:layout_constraintWidth_percent="0.5"
-            android:background="@drawable/border_custom"
-            ></EditText>
+            android:background="@drawable/border_custom" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <ListView android:id="@+id/list"
         android:layout_width="match_parent"
