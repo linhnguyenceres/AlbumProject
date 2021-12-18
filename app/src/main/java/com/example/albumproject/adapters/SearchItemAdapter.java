@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.example.albumproject.R;
 import com.example.albumproject.models.FileModel;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,17 +56,13 @@ public class SearchItemAdapter extends BaseAdapter {
             view = layoutInflater.inflate(R.layout.item_search, viewGroup, false);
         }
         ImageView image = view.findViewById(R.id.image);
+
         FileModel file = files.get(i);
-        image.setTag(file.url);
-        new LoadImage().execute(image);
-//        File imgFile = new File(file.url);
-//        if(imgFile.exists()){
-//            try {
-//                image.setImageURI(Uri.fromFile(imgFile));
-//            }catch (Exception e){
-//                int a = 1;
-//            }
-//        }
+        File imgFile = new File(file.url);
+        if (imgFile.exists()) {
+            String abs = imgFile.getAbsolutePath();
+            Picasso.with(context).load("file://" + abs).fit().centerCrop().into(image);
+        }
         TextView txtName = view.findViewById(R.id.txtName);
         txtName.setText(file.name);
         TextView txtDate = view.findViewById(R.id.txtDate);
@@ -73,6 +70,7 @@ public class SearchItemAdapter extends BaseAdapter {
 
         return view;
     }
+
 
     class LoadImage extends AsyncTask<Object, Void, Bitmap> {
 
