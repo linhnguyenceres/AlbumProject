@@ -16,11 +16,11 @@
         android:background="@drawable/border_custom">
 
         <TextView
-            android:id="@+id/txtRating"
+            android:id="@+id/txtSync"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_14"
-            android:text="@string/setting_feedback"
+            android:text="@string/setting_sync"
             android:textColor="@color/black"
             android:textSize="@dimen/text_size_16sp"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,11 +18,13 @@ import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,16 +38,26 @@ import com.example.albumproject.adapters.MyPagerAdapter;
 import com.example.albumproject.data.ImageData;
 import com.example.albumproject.fragments.FragmentImage;
 import com.example.albumproject.models.FileModel;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.material.tabs.TabLayout;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener
+//        implements PopupMenu.OnMenuItemClickListener
+{
     TextView txtTitle;
     View btnBack;
     View btnSearch;
     View btnCamera;
-    View btnMore;
+    View btnLoginGoogle;
     TabLayout tabLayout;
     ViewPager viewPager;
     int REQUEST_PERMISSION = 11;
@@ -52,14 +66,29 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     int offsetList = 0;
     boolean isMore = true;
     boolean isLoad = false;
+    private GoogleApiClient googleApiClient;
+    private static final int SIGN_IN = 1;
+    ImageView avatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        googleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this,this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+
         getViews();
         addControl();
         initClick();
+
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -68,15 +97,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         btnBack = (View) findViewById(R.id.btnBack);
         btnSearch = (View) findViewById(R.id.btnSearch);
         btnCamera = (View) findViewById(R.id.btnCamera);
-        btnMore = (View) findViewById(R.id.btnMore);
+        btnLoginGoogle = (View) findViewById(R.id.imgLoginGG);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        avatar = (ImageView) findViewById(R.id.imgCamera);
 
-        viewPager.setOnTouchListener(new View.OnTouchListener()
-        {
+        viewPager.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
+            public boolean onTouch(View v, MotionEvent event) {
                 return true;
             }
         });
@@ -113,29 +141,37 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 Toast.makeText(MainActivity.this, "Camera", Toast.LENGTH_LONG).show();
             }
         });
+
+        btnLoginGoogle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                startActivityForResult(intent, SIGN_IN);
+            }
+        });
     }
 
-    public void showPopup(View v) {
-        PopupMenu popup = new PopupMenu(this, v);
-        popup.setOnMenuItemClickListener(this);
-        popup.inflate(R.menu.popup_menu);
-        popup.show();
-    }
+//    public void showPopup(View v) {
+//        PopupMenu popup = new PopupMenu(this, v);
+//        popup.setOnMenuItemClickListener(this);
+//        popup.inflate(R.menu.popup_menu);
+//        popup.show();
+//    }
 
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.itemChoose:
-                Toast.makeText(this, "Item 1 clicked", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.itemSetting:
-//                startActivity(new Intent(MainActivity.this, SettingActivity.class));
-                return true;
-            default:
-                return false;
-        }
-    }
+//    @Override
+//    public boolean onMenuItemClick(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.itemChoose:
+//                Toast.makeText(this, "Item 1 clicked", Toast.LENGTH_SHORT).show();
+//                return true;
+//            case R.id.itemSetting:
+////                startActivity(new Intent(MainActivity.this, SettingActivity.class));
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 
 
     public void loadListImage(int skip, int limit) {
@@ -195,5 +231,29 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == SIGN_IN){
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if(result.isSuccess()){
+//                startActivity(new Intent(MainActivity.this));
+                Toast.makeText(this,"SUCCESS", Toast.LENGTH_SHORT).show();
+                GoogleSignInAccount account = result.getSignInAccount();
+                File file1 = new  File(String.valueOf(account.getPhotoUrl()));
+                if(file1.exists()){
+                    Bitmap bmImg = BitmapFactory.decodeFile(String.valueOf(account.getPhotoUrl()));
+                    avatar.setImageBitmap(Bitmap.createScaledBitmap(bmImg, 200, 200, false));
+                };
+            }else{
+                Toast.makeText(this,"LOGIN FAIL", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
 
