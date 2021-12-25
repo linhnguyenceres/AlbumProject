@@ -25,14 +25,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SettingActivity"
-            android:parentActivityName=".activities.MainActivity"
-            android:label="Setting"
-            >
-        </activity>
-        <activity
             android:name=".activities.SettingWebViewActivity"
-            android:parentActivityName=".activities.SettingActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:label="SettingWebView"
             >
         </activity>
@@ -40,6 +34,12 @@
             android:name=".activities.SearchActivity"
             android:parentActivityName=".activities.MainActivity"
             android:label="Search"
+            >
+        </activity>
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:label="Login"
             >
         </activity>
     </application>

@@ -3,54 +3,57 @@ package com.example.albumproject.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MergeCursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.albumproject.R;
 import com.example.albumproject.adapters.MyPagerAdapter;
 import com.example.albumproject.data.ImageData;
-import com.example.albumproject.fragments.FragmentImage;
-import com.example.albumproject.models.FileModel;
-import com.google.android.gms.auth.api.Auth;
+import com.example.albumproject.models.FileMainModel;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener
+public class MainActivity extends AppCompatActivity
 //        implements PopupMenu.OnMenuItemClickListener
 {
     TextView txtTitle;
@@ -61,29 +64,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     TabLayout tabLayout;
     ViewPager viewPager;
     int REQUEST_PERMISSION = 11;
-    ArrayList<ImageData> listImage;
+    ArrayList<FileMainModel> listImage;
     int limitList = 10;
     int offsetList = 0;
     boolean isMore = true;
     boolean isLoad = false;
-    private GoogleApiClient googleApiClient;
-    private static final int SIGN_IN = 1;
-    ImageView avatar;
+    ImageView imgAvatar;
+
+    private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth firebaseAuth;
+
+    private static final int RC_SIGN_IN = 100;
+    private static final String TAG = "GOOGLE_SIGN_IN_TAG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        GoogleSignInOptions gso = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
-        googleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this,this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
+        firebaseAuth = FirebaseAuth.getInstance();
         getViews();
         addControl();
         initClick();
@@ -100,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         btnLoginGoogle = (View) findViewById(R.id.imgLoginGG);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        avatar = (ImageView) findViewById(R.id.imgCamera);
+        imgAvatar = (ImageView) findViewById(R.id.imgCamera);
 
         viewPager.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -138,15 +144,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Camera", Toast.LENGTH_LONG).show();
+//                startActivity(new Intent(MainActivity.this,LoginActivity.class));
             }
         });
 
         btnLoginGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-                startActivityForResult(intent, SIGN_IN);
+                Intent intent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(intent, RC_SIGN_IN);
             }
         });
     }
@@ -207,10 +213,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             String url = cursor.getString(column_index);
             column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             String name = cursor.getString(column_index);
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            String date = cursor.getString(column_index);
-            ImageData data = new ImageData(name, url, date);
-            listImage.add(data);
+            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+            Long millis = cursor.getLong(column_index);
+            ImageData data = new ImageData(name, url, "date");
+            LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).toLocalDate();
+            FileMainModel itemImage = new FileMainModel(date);
+
+            FileMainModel imageExist = listImage.stream()
+                    .filter(image -> date.equals(image.date))
+                    .findAny()
+                    .orElse(null);
+            if (imageExist != null)
+                imageExist.files.add(data);
+            else {
+                itemImage.files.add(data);
+                listImage.add(itemImage);
+            }
             cursor.moveToNext();
         }
         offsetList += limit;
@@ -231,29 +249,94 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SIGN_IN){
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if(result.isSuccess()){
-//                startActivity(new Intent(MainActivity.this));
-                Toast.makeText(this,"SUCCESS", Toast.LENGTH_SHORT).show();
-                GoogleSignInAccount account = result.getSignInAccount();
-                File file1 = new  File(String.valueOf(account.getPhotoUrl()));
-                if(file1.exists()){
-                    Bitmap bmImg = BitmapFactory.decodeFile(String.valueOf(account.getPhotoUrl()));
-                    avatar.setImageBitmap(Bitmap.createScaledBitmap(bmImg, 200, 200, false));
-                };
-            }else{
-                Toast.makeText(this,"LOGIN FAIL", Toast.LENGTH_SHORT).show();
+    public void onMsgFromFragToMain(String sender, String strValue) {
+        if (sender.equals("FRAGMENT_IMAGE")) {
+            if (strValue.equals("loadMore")) {
+                loadListImage(offsetList, limitList);
             }
         }
     }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        firebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.e(TAG, "[signInWithCredential:success]");
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            user.getIdToken(true).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+                                @Override
+                                public void onSuccess(GetTokenResult result) {
+                                    String idToken = result.getToken();
+                                    //Do whatever
+                                    Log.e(TAG, "[GetTokenResult result = ]" + idToken);
+                                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                                }
+                            });
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.e(TAG, "[signInWithCredential:failure]", task.getException());
+                        }
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+//                Toast.makeText(this,"SUCCESS", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "[firebaseAuthWithGoogle:]" + account.getId());
+                firebaseAuthWithGoogle(account.getIdToken());
+//                firebaseAuthWithGoogleAccount(account);
+//                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+//                Toast.makeText(this,"LOGIN FAIL", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "[Google sign in failed]", e);
+            }
+        }
+    }
+
+//    private void firebaseAuthWithGoogleAccount(GoogleSignInAccount account) {
+//        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+//        firebaseAuth.signInWithCredential(credential)
+//                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+//                    @Override
+//                    public void onSuccess(AuthResult authResult) {
+//                        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+//
+//                        String uid = firebaseUser.getUid();
+//                        String email = firebaseUser.getEmail();
+//
+//
+//
+//                        if (authResult.getAdditionalUserInfo().isNewUser()) {
+//
+//                        } else {
+//
+//                        }
+//                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+//                        finish();
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//
+//                    }
+//                });
+//
+//    }
+
 }
 
