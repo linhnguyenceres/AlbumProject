@@ -10,11 +10,14 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -45,6 +48,8 @@ public class SearchActivity extends Activity {
     boolean isMore = true;
     boolean isLoad = false;
     ArrayList<FileModel> listImage;
+    final Handler handler = new Handler(Looper.getMainLooper());
+    String searchText = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,13 @@ public class SearchActivity extends Activity {
         list.setAdapter(adapter);
     }
 
+    void handleSearch(){
+        offsetList = 0;
+        listImage.clear();
+        ((BaseAdapter) list.getAdapter()).notifyDataSetChanged();
+        loadListImage(offsetList, limitList);
+    }
+
     void initEvent() {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,10 +95,29 @@ public class SearchActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                searchText = charSequence.toString();
             }
+            private Timer timer = new Timer();
+            private final long DELAY = 1000; // Milliseconds
 
             @Override
             public void afterTextChanged(Editable editable) {
+                timer.cancel();
+                timer = new Timer();
+                timer.schedule(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        handleSearch();
+                                    }
+                                });
+                            }
+                        },
+                        DELAY
+                );
             }
         });
 
@@ -146,7 +177,7 @@ public class SearchActivity extends Activity {
         MergeCursor cursor = new MergeCursor(new Cursor[]{
 //                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, null),
 //                getApplication().getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, columns, null, null, null),
-                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
+                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,  MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+searchText+"%"}, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
 //                getApplication().getContentResolver().query(MediaStore.Video.Media.INTERNAL_CONTENT_URI, columns, null, null, null)
         });
         if (cursor.getCount() == 0) {
