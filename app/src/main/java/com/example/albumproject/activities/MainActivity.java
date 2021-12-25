@@ -2,6 +2,7 @@ package com.example.albumproject.activities;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.PopupMenu;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         initClick();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     void getViews() {
         txtTitle = (TextView) findViewById(R.id.txtTitle);
         btnBack = (View) findViewById(R.id.btnBack);
@@ -75,6 +78,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         btnMore = (View) findViewById(R.id.btnMore);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+
+        viewPager.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                return true;
+            }
+        });
 
         listImage = new ArrayList<>();
         loadListImage(offsetList, limitList);
@@ -127,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 Toast.makeText(this, "Item 1 clicked", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.itemSetting:
-                startActivity(new Intent(MainActivity.this, SettingActivity.class));
+//                startActivity(new Intent(MainActivity.this, SettingActivity.class));
                 return true;
             default:
                 return false;
