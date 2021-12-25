@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/dimen_8"
-        android:text="@string/txt_date"
+        android:text="@string/page_name"
         android:textSize="@dimen/text_size_20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
@@ -100,22 +100,25 @@
         app:layout_constraintRight_toRightOf="@id/imgSearch"
         app:layout_constraintTop_toTopOf="@id/imgSearch" />
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="@dimen/dimen_8"
-        android:background="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/btnBack"
-        app:tabSelectedTextColor="@color/purple_500">
-
-    </com.google.android.material.tabs.TabLayout>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/dimen_8"
+        app:layout_constraintBottom_toTopOf="@id/tabLayout"
+        app:layout_constraintTop_toBottomOf="@id/btnBack" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+        app:layout_constraintTop_toBottomOf="@id/viewPager"
+
+        app:tabSelectedTextColor="@color/purple_500">
+
+    </com.google.android.material.tabs.TabLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

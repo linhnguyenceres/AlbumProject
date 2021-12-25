@@ -12,6 +12,7 @@ import com.example.albumproject.data.ImageData;
 import com.example.albumproject.fragments.FragmentImage;
 import com.example.albumproject.fragments.FragmentListImage;
 import com.example.albumproject.fragments.FragmentOnline;
+import com.example.albumproject.fragments.FragmentSetting;
 import com.example.albumproject.models.FileModel;
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
                 return new FragmentListImage();
             case 2:
                 return new FragmentOnline();
+            case 3:
+                return new FragmentSetting();
             default:
                 return new FragmentImage(listImageData);
         }
@@ -45,7 +48,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -60,6 +63,9 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
                 break;
             case 2:
                 title = "Trực tuyến";
+                break;
+            case 3:
+                title = "Cài đặt";
                 break;
         }
         return title;
