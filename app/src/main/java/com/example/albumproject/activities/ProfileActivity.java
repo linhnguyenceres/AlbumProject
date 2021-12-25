@@ -82,8 +82,8 @@ public class ProfileActivity extends Activity {
             Uri avatar = firebaseUser.getPhotoUrl();
             txtEmail.setText(email);
             txtName.setText(name);
-//            imgAvatar.setImageURI(avatar);
             Picasso.with(this).load(avatar).into(imgAvatar);
+
         }
     }
 }

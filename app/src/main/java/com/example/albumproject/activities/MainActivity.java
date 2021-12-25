@@ -292,51 +292,14 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-//                Toast.makeText(this,"SUCCESS", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "[firebaseAuthWithGoogle:]" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
-//                firebaseAuthWithGoogleAccount(account);
-//                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-//                Toast.makeText(this,"LOGIN FAIL", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "[Google sign in failed]", e);
             }
         }
     }
-
-//    private void firebaseAuthWithGoogleAccount(GoogleSignInAccount account) {
-//        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-//        firebaseAuth.signInWithCredential(credential)
-//                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-//                    @Override
-//                    public void onSuccess(AuthResult authResult) {
-//                        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-//
-//                        String uid = firebaseUser.getUid();
-//                        String email = firebaseUser.getEmail();
-//
-//
-//
-//                        if (authResult.getAdditionalUserInfo().isNewUser()) {
-//
-//                        } else {
-//
-//                        }
-//                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-//                        finish();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//
-//                    }
-//                });
-//
-//    }
 
 }
 
