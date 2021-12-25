@@ -3,36 +3,38 @@ package com.example.albumproject.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.albumproject.R;
-import com.example.albumproject.models.FileModel;
-import com.squareup.picasso.Picasso;
+import com.example.albumproject.data.ImageData;
+import com.example.albumproject.models.FileMainModel;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class SearchItemAdapter extends BaseAdapter {
+public class TabImageParentAdapter extends BaseAdapter {
 
     Context context;
     private LayoutInflater layoutInflater;
-    ArrayList<FileModel> files;
+    ArrayList<FileMainModel> list;
+    TabImageAdapter adapter;
 
-    public SearchItemAdapter(Context context, ArrayList<FileModel> files) {
+
+    public TabImageParentAdapter(Context context, ArrayList<FileMainModel> list){
         this.context = context;
-        this.files = files;
+        this.list = list;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return files.size();
+        return list.size();
     }
 
     @Override
@@ -48,20 +50,15 @@ public class SearchItemAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         if (view == null) {
-            view = layoutInflater.inflate(R.layout.item_search, viewGroup, false);
+            view = layoutInflater.inflate(R.layout.fragment_image_item, viewGroup, false);
         }
-        ImageView image = view.findViewById(R.id.image);
+        TextView txtTime = view.findViewById(R.id.txtTime);
+        txtTime.setText(list.get(i).dateDisplay);
 
-        FileModel file = files.get(i);
-        File imgFile = new File(file.url);
-        if (imgFile.exists()) {
-            String abs = imgFile.getAbsolutePath();
-            Picasso.with(context).load("file://" + abs).fit().centerCrop().into(image);
-        }
-        TextView txtName = view.findViewById(R.id.txtName);
-        txtName.setText(file.name);
-        TextView txtDate = view.findViewById(R.id.txtDate);
-        txtDate.setText(file.date);
+        GridView gridView;
+        gridView = (GridView) view.findViewById(R.id.gridImage);
+        adapter = new TabImageAdapter(context, list.get(i).files);
+        gridView.setAdapter(adapter);
 
         return view;
     }

@@ -30,7 +30,9 @@ import com.example.albumproject.R;
 import com.example.albumproject.activities.MainActivity;
 import com.example.albumproject.adapters.SearchItemAdapter;
 import com.example.albumproject.adapters.TabImageAdapter;
+import com.example.albumproject.adapters.TabImageParentAdapter;
 import com.example.albumproject.data.ImageData;
+import com.example.albumproject.models.FileMainModel;
 import com.example.albumproject.models.FileModel;
 import com.squareup.picasso.Picasso;
 
@@ -40,6 +42,8 @@ import java.util.ArrayList;
 public class FragmentImage extends Fragment {
 
     Context context;
+    MainActivity main;
+    boolean isLoad = false;
 
 
     int[] myImages = {R.mipmap.ic_example,
@@ -49,130 +53,67 @@ public class FragmentImage extends Fragment {
             R.mipmap.ic_example,
             R.mipmap.ic_example};
 
-    ArrayList<ImageData> listImage;
+    ArrayList<FileMainModel> list;
 
 //    Bundle bundle;
 
-    public FragmentImage(ArrayList<ImageData> listImage) {
-        this.listImage = listImage;
-        // Required empty public constructor
+    public FragmentImage(ArrayList<FileMainModel> list) {
+        this.list = list;
     }
 
-
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        main = (MainActivity) getActivity();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
-        GridView gridView;
-        gridView = (GridView) rootView.findViewById(R.id.gridImage);
 
-        TabImageAdapter adapter = new TabImageAdapter(getActivity(), listImage);
-        gridView.setAdapter(adapter);
+        ListView listVew = (ListView) rootView.findViewById(R.id.list);
 
+        TabImageParentAdapter adapter = new TabImageParentAdapter(getActivity(), list);
+        listVew.setAdapter(adapter);
 
-//        list.setOnScrollListener(new AbsListView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(AbsListView absListView, int i) {
-//
-//            }
-//
-//            @Override
-//            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-//                if (i == 0) {
-//                    // check if we reached the top or bottom of the list
-//                    View v = list.getChildAt(0);
-//                    int offset = (v == null) ? 0 : v.getTop();
-//                    if (offset == 0) {
-//                        // reached the top:
-//                        return;
-//                    }
-//                } else if (i2 - i1 == i) {
-//                    View v = list.getChildAt(i2 - 2);
-//                    int offset = (v == null) ? 0 : v.getTop();
-//                    if (offset == 0) {
-//                        if (isLoad == false) {
-//                            isLoad = true;
-//                            loadListImage(offsetList, limitList);
-////                            isLoad = false;
-//                            return;
-//                        }
-//                    }
-//                }
-//            }
-//        });
+        listVew.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                if (i == 0) {
+                    // check if we reached the top or bottom of the list
+                    View v = listVew.getChildAt(0);
+                    int offset = (v == null) ? 0 : v.getTop();
+                    if (offset == 0) {
+                        // reached the top:
+                        return;
+                    }
+                } else if (i2 - i1 == i) {
+                    View v = listVew.getChildAt(i2 - 2);
+                    int offset = (v == null) ? 0 : v.getTop();
+                    if (offset == 0) {
+                        if (isLoad == false) {
+                            isLoad = true;
+                            main.onMsgFromFragToMain("FRAGEMENT_IMAGE","loadMore");
+                            isLoad = false;
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
         return rootView;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
     }
-
-
-//    public void loadListImage(int skip, int limit) {
-//        if (ActivityCompat.checkSelfPermission(getContext(),
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-//            requestPermissions( //Method of Fragment
-//                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-//                    REQUEST_PERMISSION
-//            );
-//            return;
-//        }
-//
-////        if (ContextCompat.checkSelfPermission((Activity)context,
-////                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-////            requestPermissions( new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-////                    REQUEST_PERMISSION);
-////            return;
-////        }
-//        final String[] columns = {MediaStore.Images.Media.DATA,
-//                MediaStore.Images.Media.DATE_ADDED,
-//                MediaStore.Images.Media.BUCKET_ID,
-//                MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-//                MediaStore.Images.Media.DISPLAY_NAME,
-//                MediaStore.Images.Media.SIZE,
-//                MediaStore.Images.Media.DATE_TAKEN
-//        };
-//        final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-//        MergeCursor cursor = new MergeCursor(new Cursor[]{
-//                getContextOfApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
-//        });
-//        if (cursor.getCount() == 0) {
-//            isMore = false;
-//            return;
-//        }
-//        cursor.moveToFirst();
-//        while (!cursor.isAfterLast()) {
-//            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//            String url = cursor.getString(column_index);
-//            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-//            String name = cursor.getString(column_index);
-//            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-//            String date = cursor.getString(column_index);
-//            ImageData data = new ImageData(name, url, date);
-//            listImage.add(data);
-//            cursor.moveToNext();
-//        }
-//        offsetList += limit;
-//        if (listImage.size() % 10 == 0) {
-//            isLoad = false;
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-////        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == REQUEST_PERMISSION) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                loadListImage(offsetList, limitList);
-//            } else {
-//                // User refused to grant permission.
-//            }
-//        }
-//    }
-//
-
-    }
+}

@@ -14,6 +14,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,12 +32,18 @@ import com.example.albumproject.R;
 import com.example.albumproject.adapters.MyPagerAdapter;
 import com.example.albumproject.data.ImageData;
 import com.example.albumproject.fragments.FragmentImage;
+import com.example.albumproject.models.FileMainModel;
 import com.example.albumproject.models.FileModel;
 import com.google.android.material.tabs.TabLayout;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     TextView txtTitle;
     View btnBack;
     View btnSearch;
@@ -45,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     TabLayout tabLayout;
     ViewPager viewPager;
     int REQUEST_PERMISSION = 11;
-    ArrayList<ImageData> listImage;
+    ArrayList<FileMainModel> listImage;
     int limitList = 10;
     int offsetList = 0;
     boolean isMore = true;
@@ -101,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 Toast.makeText(MainActivity.this, "Camera", Toast.LENGTH_LONG).show();
             }
         });
+
+
     }
 
     public void showPopup(View v) {
@@ -159,10 +168,22 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             String url = cursor.getString(column_index);
             column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             String name = cursor.getString(column_index);
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            String date = cursor.getString(column_index);
-            ImageData data = new ImageData(name, url, date);
-            listImage.add(data);
+            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+            Long millis = cursor.getLong(column_index);
+            ImageData data = new ImageData(name, url, "date");
+            LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).toLocalDate();
+            FileMainModel itemImage = new FileMainModel(date);
+
+            FileMainModel imageExist = listImage.stream()
+                    .filter(image -> date.equals(image.date))
+                    .findAny()
+                    .orElse(null);
+            if (imageExist != null)
+                imageExist.files.add(data);
+            else {
+                itemImage.files.add(data);
+                listImage.add(itemImage);
+            }
             cursor.moveToNext();
         }
         offsetList += limit;
@@ -179,6 +200,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 loadListImage(offsetList, limitList);
             } else {
                 // User refused to grant permission.
+            }
+        }
+    }
+
+    public void onMsgFromFragToMain(String sender, String strValue) {
+        if (sender.equals("FRAGEMENT_IMAGE")){
+            if(strValue.equals("loadMore")){
+                loadListImage(offsetList, limitList);
             }
         }
     }
