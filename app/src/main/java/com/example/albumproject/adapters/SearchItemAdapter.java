@@ -60,8 +60,8 @@ public class SearchItemAdapter extends BaseAdapter {
         }
         TextView txtName = view.findViewById(R.id.txtName);
         txtName.setText(file.name);
-        TextView txtDate = view.findViewById(R.id.txtDate);
-        txtDate.setText(file.date);
+//        TextView txtDate = view.findViewById(R.id.txtDate);
+//        txtDate.setText(file.date);
 
         return view;
     }
