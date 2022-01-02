@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/dimen_8"
-        android:text="@string/txt_date"
+        android:text="@string/page_name"
         android:textSize="@dimen/text_size_20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
@@ -40,25 +40,24 @@
         app:layout_constraintTop_toTopOf="@id/imgBack" />
 
     <ImageView
-        android:id="@+id/imgMore"
+        android:id="@+id/imgLoginGG"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/dimen_16"
-        android:src="@drawable/ic_more"
+        android:src="@drawable/ic_account_circle"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@id/imgBack" />
 
-
+<!--    android:onClick="showPopup"-->
     <View
-        android:id="@+id/btnMore"
+        android:id="@+id/btnLoginGG"
         android:layout_width="@dimen/dimen_40"
         android:layout_height="@dimen/dimen_40"
-        android:onClick="showPopup"
-        app:layout_constraintBottom_toBottomOf="@id/imgMore"
-        app:layout_constraintLeft_toLeftOf="@id/imgMore"
-        app:layout_constraintRight_toRightOf="@id/imgMore"
-        app:layout_constraintTop_toTopOf="@id/imgMore" />
+        app:layout_constraintBottom_toBottomOf="@id/imgLoginGG"
+        app:layout_constraintLeft_toLeftOf="@id/imgLoginGG"
+        app:layout_constraintRight_toRightOf="@id/imgLoginGG"
+        app:layout_constraintTop_toTopOf="@id/imgLoginGG" />
 
     <ImageView
         android:id="@+id/imgCamera"
@@ -67,7 +66,7 @@
         android:layout_marginRight="@dimen/dimen_16"
         android:src="@drawable/ic_camera"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
-        app:layout_constraintRight_toLeftOf="@id/btnMore"
+        app:layout_constraintRight_toLeftOf="@id/btnLoginGG"
         app:layout_constraintTop_toTopOf="@id/imgBack" />
 
 
@@ -100,22 +99,26 @@
         app:layout_constraintRight_toRightOf="@id/imgSearch"
         app:layout_constraintTop_toTopOf="@id/imgSearch" />
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="@dimen/dimen_8"
-        android:background="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/btnBack"
-        app:tabSelectedTextColor="@color/purple_500">
-
-    </com.google.android.material.tabs.TabLayout>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/dimen_8"
+        app:layout_constraintBottom_toTopOf="@id/tabLayout"
+        app:layout_constraintTop_toBottomOf="@id/btnBack" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+        app:layout_constraintTop_toBottomOf="@id/viewPager"
+        app:tabTextColor="@color/black"
+        app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
+        app:tabSelectedTextColor="@color/purple_500">
+
+    </com.google.android.material.tabs.TabLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

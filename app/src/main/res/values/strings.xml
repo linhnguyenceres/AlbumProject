@@ -2,7 +2,7 @@
     <string name="app_name">Album G8</string>
     <string name="txt_date">Ngày</string>
     <string name="setting_topic">Chủ đề</string>
-    <string name="setting_feedback">Đánh giá chúng tôi</string>
+    <string name="setting_sync">Đồng bộ ảnh trực tuyến</string>
     <string name="setting_policy">Chính sách bảo mật</string>
     <string name="setting_term">Điều khoản dịch vụ</string>
     <string name="setting">Cài đặt</string>
@@ -10,4 +10,5 @@
     <string name="fragment_image">Ảnh</string>
     <string name="search_hint">Tìm kiếm ảnh</string>
     <string name="choose">Lựa chọn</string>
+    <string name="page_name">My Album</string>
 </resources>

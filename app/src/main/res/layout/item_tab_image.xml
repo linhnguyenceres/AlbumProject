@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/imgPicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_marginLeft="@dimen/dimen_8"
         android:src="@mipmap/ic_example"
         app:layout_constraintLeft_toLeftOf="parent"

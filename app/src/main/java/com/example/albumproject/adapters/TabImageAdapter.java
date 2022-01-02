@@ -27,7 +27,6 @@ public class TabImageAdapter extends BaseAdapter {
 
     Context context;
     private LayoutInflater layoutInflater;
-//    int[] images;
     ArrayList<ImageData> listImage;
 
 
@@ -49,7 +48,6 @@ public class TabImageAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-
         return 0;
     }
 
@@ -61,43 +59,11 @@ public class TabImageAdapter extends BaseAdapter {
         ImageView image = view.findViewById(R.id.imgPicture);
         File file1 = new  File(listImage.get(i).url);
         if(file1.exists()){
-            Bitmap bmImg = BitmapFactory.decodeFile(listImage.get(i).url);
-            image.setImageBitmap(Bitmap.createScaledBitmap(bmImg, 200, 200, false));
-
+//            Bitmap bmImg = BitmapFactory.decodeFile(listImage.get(i).url);
+//            image.setImageBitmap(Bitmap.createScaledBitmap(bmImg, 200, 200, false));
+            String abs = file1.getAbsolutePath();
+            Picasso.with(context).load("file://" + abs).fit().centerCrop().into(image);
         };
         return view;
-    }
-
-
-    class LoadImage extends AsyncTask<Object, Void, Bitmap> {
-
-        private ImageView imv;
-        private String path;
-
-
-        @Override
-        protected Bitmap doInBackground(Object... params) {
-            imv = (ImageView) params[0];
-
-            path = imv.getTag().toString();
-
-            Bitmap bitmap = null;
-            File file = new File(path);
-
-            if (file.exists()) {
-                bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            }
-            return bitmap;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null && imv != null) {
-                imv.setVisibility(View.VISIBLE);
-                imv.setImageBitmap(result);
-            } else {
-                imv.setVisibility(View.GONE);
-            }
-        }
     }
 }
