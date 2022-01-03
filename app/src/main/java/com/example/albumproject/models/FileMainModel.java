@@ -10,10 +10,12 @@ public class FileMainModel {
     public LocalDate date;
     public String dateDisplay;
     public ArrayList<ImageData> files;
+    public String library;
 
-    public FileMainModel(LocalDate date) {
+    public FileMainModel(LocalDate date, String libraryName) {
         this.date = date;
         this.dateDisplay = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(date);
         this.files = new ArrayList<>();
+        this.library = libraryName;
     }
 }

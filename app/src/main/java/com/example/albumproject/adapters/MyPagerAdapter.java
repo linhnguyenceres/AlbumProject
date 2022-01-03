@@ -14,21 +14,25 @@ import java.util.ArrayList;
 public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     ArrayList<FileMainModel> listImageData;
+    ArrayList<FileMainModel> listLibraryImage;
 
     public MyPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
 
-    public MyPagerAdapter(@NonNull FragmentManager fm, int behavior, ArrayList<FileMainModel> listImageData) {
+    public MyPagerAdapter(@NonNull FragmentManager fm, int behavior,
+                          ArrayList<FileMainModel> listImageData,
+                          ArrayList<FileMainModel> listLibraryImage) {
         super(fm, behavior);
         this.listImageData = listImageData;
+        this.listLibraryImage = listLibraryImage;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 1:
-                return new FragmentListImage();
+                return new FragmentListImage(listLibraryImage);
             case 2:
                 return new FragmentSetting();
             default:

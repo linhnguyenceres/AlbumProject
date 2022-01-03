@@ -45,6 +45,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.albumproject.BuildConfig;
 import com.example.albumproject.R;
 import com.example.albumproject.adapters.MyPagerAdapter;
+import com.example.albumproject.data.Constant;
 import com.example.albumproject.data.ImageData;
 import com.example.albumproject.models.FileMainModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -81,8 +82,7 @@ import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity
-        implements PopupMenu.OnMenuItemClickListener
-{
+        implements PopupMenu.OnMenuItemClickListener {
     TextView txtTitle;
     View btnBack;
     View btnSearch;
@@ -114,6 +114,9 @@ public class MainActivity extends AppCompatActivity
     static final int CAPTURE_IMAGE_REQUEST = 1;
     File photoFile = null;
     Uri photoURI = null;
+
+
+    ArrayList<FileMainModel> listLibraryImage;
 
 
     @Override
@@ -154,14 +157,16 @@ public class MainActivity extends AppCompatActivity
         });
 
         listImage = new ArrayList<>();
+        listLibraryImage = new ArrayList<>();
         loadListImage(offsetList, limitList);
+        loadListLibraryImage(offsetList, limitList);
 
 
     }
 
     private void addControl() {
         MyPagerAdapter adapter = new MyPagerAdapter(getSupportFragmentManager(),
-                FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, listImage);
+                FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, listImage, listLibraryImage);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
     }
@@ -170,7 +175,8 @@ public class MainActivity extends AppCompatActivity
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Back", Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, "Back", Toast.LENGTH_LONG).show();
+                finish();
             }
         });
 
@@ -215,7 +221,7 @@ public class MainActivity extends AppCompatActivity
                 signOut();
                 break;
             default:
-               break;
+                break;
         }
         return true;
     }
@@ -258,15 +264,16 @@ public class MainActivity extends AppCompatActivity
             Long millis = cursor.getLong(column_index);
             ImageData data = new ImageData(name, url, "date");
             LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).toLocalDate();
-            FileMainModel itemImage = new FileMainModel(date);
+            FileMainModel itemImage = new FileMainModel(date, getLibraryName(url.toString()));
 
             FileMainModel imageExist = listImage.stream()
                     .filter(image -> date.equals(image.date))
                     .findAny()
                     .orElse(null);
-            if (imageExist != null)
+
+            if (imageExist != null) {
                 imageExist.files.add(data);
-            else {
+            } else {
                 itemImage.files.add(data);
                 listImage.add(itemImage);
             }
@@ -285,6 +292,7 @@ public class MainActivity extends AppCompatActivity
             case REQUEST_PERMISSION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     loadListImage(offsetList, limitList);
+                    loadListLibraryImage(offsetList, limitList);
                 } else {
                     // User refused to grant permission.
                 }
@@ -322,6 +330,7 @@ public class MainActivity extends AppCompatActivity
         if (sender.equals("FRAGMENT_IMAGE")) {
             if (strValue.equals("loadMore")) {
                 loadListImage(offsetList, limitList);
+                loadListLibraryImage(offsetList, limitList);
             }
         }
     }
@@ -564,7 +573,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void updateUI(GoogleSignInAccount acct){
+    private void updateUI(GoogleSignInAccount acct) {
         acct = GoogleSignIn.getLastSignedInAccount(this);
         if (acct != null) {
             String personName = acct.getDisplayName();
@@ -574,7 +583,7 @@ public class MainActivity extends AppCompatActivity
             String personId = acct.getId();
             Uri personPhoto = acct.getPhotoUrl();
             Picasso.with(this).load(personPhoto).into(imgAvatar);
-        }else{
+        } else {
             imgAvatar.setImageResource(R.drawable.ic_account_circle);
         }
     }
@@ -599,5 +608,75 @@ public class MainActivity extends AppCompatActivity
 //                    }
 //                });
 //    }
+
+    private String getLibraryName(String url) {
+        String result = "";
+        if (url.contains("Screenshot")) {
+            result = Constant.SCREEN_SHOTS;
+        }
+        else if (url.contains("Messenger")) {
+            result = Constant.MESSENGER;
+        }
+        else if (url.contains("Picture")) {
+            result = Constant.CAMERA;
+        } else if (url.contains("Facebook")) {
+            result = Constant.FACEBOOK;
+        }else if(url.contains("Zalo")){
+            result = Constant.ZALO;
+        }
+        return result;
+    }
+
+    public void loadListLibraryImage(int skip, int limit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION);
+            return;
+        }
+        final String[] columns = {MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.BUCKET_ID,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.SIZE
+        };
+        final String orderBy = MediaStore.Images.Media.DISPLAY_NAME;
+        MergeCursor cursor = new MergeCursor(new Cursor[]{
+                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
+                        orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
+        });
+        if (cursor.getCount() == 0) {
+            isMore = false;
+            return;
+        }
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            String url = cursor.getString(column_index);
+            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+            String name = cursor.getString(column_index);
+            Long millis = cursor.getLong(column_index);
+            ImageData data = new ImageData(name, url, "date");
+            LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).toLocalDate();
+            FileMainModel itemLibraryImage = new FileMainModel(date, getLibraryName(url.toString()));
+
+
+            FileMainModel imageLibraryExist = listLibraryImage.stream()
+                    .filter(image -> getLibraryName(url).equals(getLibraryName(image.files.toString())))
+                    .findAny()
+                    .orElse(null);
+            if (imageLibraryExist != null) {
+                imageLibraryExist.files.add(data);
+            } else {
+                itemLibraryImage.files.add(data);
+                listLibraryImage.add(itemLibraryImage);
+            }
+            cursor.moveToNext();
+        }
+        offsetList += limit;
+        if (listLibraryImage.size() % 10 == 0) {
+            isLoad = false;
+        }
+    }
 }
 

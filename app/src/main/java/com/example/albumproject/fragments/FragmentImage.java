@@ -46,12 +46,12 @@ public class FragmentImage extends Fragment {
     boolean isLoad = false;
 
 
-    int[] myImages = {R.mipmap.ic_example,
-            R.mipmap.ic_example,
-            R.mipmap.ic_example,
-            R.mipmap.ic_example,
-            R.mipmap.ic_example,
-            R.mipmap.ic_example};
+//    int[] myImages = {R.mipmap.ic_example,
+//            R.mipmap.ic_example,
+//            R.mipmap.ic_example,
+//            R.mipmap.ic_example,
+//            R.mipmap.ic_example,
+//            R.mipmap.ic_example};
 
     ArrayList<FileMainModel> list;
 
