@@ -24,9 +24,11 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,13 +81,12 @@ import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity
-//        implements PopupMenu.OnMenuItemClickListener
+        implements PopupMenu.OnMenuItemClickListener
 {
     TextView txtTitle;
     View btnBack;
     View btnSearch;
     View btnCamera;
-    View btnLoginGoogle;
     TabLayout tabLayout;
     ViewPager viewPager;
     //    int REQUEST_PERMISSION = 11;
@@ -141,10 +142,9 @@ public class MainActivity extends AppCompatActivity
         btnBack = (View) findViewById(R.id.btnBack);
         btnSearch = (View) findViewById(R.id.btnSearch);
         btnCamera = (View) findViewById(R.id.btnCamera);
-        btnLoginGoogle = (View) findViewById(R.id.imgLoginGG);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        imgAvatar = (ImageView) findViewById(R.id.imgCamera);
+        imgAvatar = (ImageView) findViewById(R.id.imgLoginGG);
 
         viewPager.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity
 
         listImage = new ArrayList<>();
         loadListImage(offsetList, limitList);
+
+
     }
 
     private void addControl() {
@@ -186,36 +188,37 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        btnLoginGoogle.setOnClickListener(new View.OnClickListener() {
+        imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(intent, RC_SIGN_IN);
+                showPopup(imgAvatar);
             }
         });
     }
 
-//    public void showPopup(View v) {
-//        PopupMenu popup = new PopupMenu(this, v);
-//        popup.setOnMenuItemClickListener(this);
-//        popup.inflate(R.menu.popup_menu);
-//        popup.show();
-//    }
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(getApplicationContext(), v);
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.popup_menu);
+        popup.show();
+    }
 
 
-//    @Override
-//    public boolean onMenuItemClick(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.itemChoose:
-//                Toast.makeText(this, "Item 1 clicked", Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.itemSetting:
-////                startActivity(new Intent(MainActivity.this, SettingActivity.class));
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.itemLogin:
+                Intent intent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(intent, RC_SIGN_IN);
+                break;
+            case R.id.itemLogout:
+                signOut();
+                break;
+            default:
+               break;
+        }
+        return true;
+    }
 
 
     public void loadListImage(int skip, int limit) {
@@ -339,7 +342,8 @@ public class MainActivity extends AppCompatActivity
                                     String idToken = result.getToken();
                                     //Do whatever
                                     Log.e(TAG, "[GetTokenResult result = ]" + idToken);
-                                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+//                                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
                                 }
                             });
                         } else {
@@ -360,12 +364,11 @@ public class MainActivity extends AppCompatActivity
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.e(TAG, "[firebaseAuthWithGoogle:]" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
+                handleSignInResult(task);
             } catch (ApiException e) {
                 Log.e(TAG, "[Google sign in failed]", e);
             }
-        }
-        else if (requestCode == CAPTURE_IMAGE_REQUEST && resultCode == Activity.RESULT_OK)
-        {
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
 //            Bitmap photo  = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
 //            Bitmap photo = (Bitmap) data.getExtras().get("data");
 
@@ -460,20 +463,20 @@ public class MainActivity extends AppCompatActivity
     private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            try{
+            try {
                 photoFile = createImageFile();
 //                displayMessage(getBaseContext(), photoFile.getAbsolutePath());
                 Log.i("FILE", photoFile.getAbsolutePath());
 
-                if(photoFile != null){
+                if (photoFile != null) {
 
                     photoURI = FileProvider.getUriForFile(this,
-                            BuildConfig.APPLICATION_ID+ ".provider", photoFile);
+                            BuildConfig.APPLICATION_ID + ".provider", photoFile);
 
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                     startActivityForResult(takePictureIntent, CAPTURE_IMAGE_REQUEST);
                 }
-            }catch (Exception ex){
+            } catch (Exception ex) {
 //                displayMessage(getBaseContext(), ex.getMessage().toString());
                 Log.e("[ERROR]", ex.getMessage().toString());
             }
@@ -532,10 +535,10 @@ public class MainActivity extends AppCompatActivity
         Random generator = new Random();
         int n = 10000;
         n = generator.nextInt(n);
-        String fname = "Image-"+ n +".jpg";
-        File file = new File (myDir, fname);
-        if (file.exists ())
-            file.delete ();
+        String fname = "Image-" + n + ".jpg";
+        File file = new File(myDir, fname);
+        if (file.exists())
+            file.delete();
         try {
             FileOutputStream out = new FileOutputStream(file);
             finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
@@ -547,6 +550,54 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
+            // Signed in successfully, show authenticated UI.
+            updateUI(account);
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+            updateUI(null);
+        }
+    }
+
+    private void updateUI(GoogleSignInAccount acct){
+        acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            String personName = acct.getDisplayName();
+            String personGivenName = acct.getGivenName();
+            String personFamilyName = acct.getFamilyName();
+            String personEmail = acct.getEmail();
+            String personId = acct.getId();
+            Uri personPhoto = acct.getPhotoUrl();
+            Picasso.with(this).load(personPhoto).into(imgAvatar);
+        }else{
+            imgAvatar.setBackgroundResource(R.drawable.ic_account_circle);
+        }
+    }
+
+    private void signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        updateUI(null);
+//                        revokeAccess();
+                    }
+                });
+    }
+
+//    private void revokeAccess() {
+//        mGoogleSignInClient.revokeAccess()
+//                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//
+//                    }
+//                });
+//    }
 }
 

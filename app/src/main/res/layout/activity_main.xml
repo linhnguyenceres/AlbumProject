@@ -39,25 +39,44 @@
         app:layout_constraintLeft_toRightOf="@id/btnBack"
         app:layout_constraintTop_toTopOf="@id/imgBack" />
 
-    <ImageView
-        android:id="@+id/imgLoginGG"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!--    <ImageView-->
+    <!--        android:id="@+id/imgLoginGG"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginRight="@dimen/dimen_16"-->
+    <!--        android:src="@drawable/ic_account_circle"-->
+    <!--        app:layout_constraintBottom_toBottomOf="@id/imgBack"-->
+    <!--        app:layout_constraintRight_toRightOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/imgBack" />-->
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/viewCircle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginRight="@dimen/dimen_16"
-        android:src="@drawable/ic_account_circle"
+        android:shape="ring"
+        android:thicknessRatio="1.9"
+        app:cardCornerRadius="40dp"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imgBack" />
+        app:layout_constraintTop_toTopOf="@id/imgBack">
 
-<!--    android:onClick="showPopup"-->
-    <View
-        android:id="@+id/btnLoginGG"
-        android:layout_width="@dimen/dimen_40"
-        android:layout_height="@dimen/dimen_40"
-        app:layout_constraintBottom_toBottomOf="@id/imgLoginGG"
-        app:layout_constraintLeft_toLeftOf="@id/imgLoginGG"
-        app:layout_constraintRight_toRightOf="@id/imgLoginGG"
-        app:layout_constraintTop_toTopOf="@id/imgLoginGG" />
+        <ImageView
+            android:id="@+id/imgLoginGG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_account_circle" />
+    </androidx.cardview.widget.CardView>
+
+    <!--    android:onClick="showPopup"-->
+    <!--    <View-->
+    <!--        android:id="@+id/btnLoginGG"-->
+    <!--        android:layout_width="@dimen/dimen_40"-->
+    <!--        android:layout_height="@dimen/dimen_40"-->
+    <!--        app:layout_constraintBottom_toBottomOf="@id/viewCircle"-->
+    <!--        app:layout_constraintLeft_toLeftOf="@id/viewCircle"-->
+    <!--        app:layout_constraintRight_toRightOf="@id/viewCircle"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/viewCircle" />-->
 
     <ImageView
         android:id="@+id/imgCamera"
@@ -66,7 +85,7 @@
         android:layout_marginRight="@dimen/dimen_16"
         android:src="@drawable/ic_camera"
         app:layout_constraintBottom_toBottomOf="@id/imgBack"
-        app:layout_constraintRight_toLeftOf="@id/btnLoginGG"
+        app:layout_constraintRight_toLeftOf="@id/viewCircle"
         app:layout_constraintTop_toTopOf="@id/imgBack" />
 
 
@@ -116,9 +135,9 @@
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/viewPager"
-        app:tabTextColor="@color/black"
+        app:tabSelectedTextColor="@color/purple_500"
         app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
-        app:tabSelectedTextColor="@color/purple_500">
+        app:tabTextColor="@color/black">
 
     </com.google.android.material.tabs.TabLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
