@@ -575,7 +575,7 @@ public class MainActivity extends AppCompatActivity
             Uri personPhoto = acct.getPhotoUrl();
             Picasso.with(this).load(personPhoto).into(imgAvatar);
         }else{
-            imgAvatar.setBackgroundResource(R.drawable.ic_account_circle);
+            imgAvatar.setImageResource(R.drawable.ic_account_circle);
         }
     }
 
