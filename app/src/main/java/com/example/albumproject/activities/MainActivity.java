@@ -16,6 +16,7 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity
     static final int CAPTURE_IMAGE_REQUEST = 1;
     File photoFile = null;
     Uri photoURI = null;
+    Boolean isLoginSuccess = false;
 
 
     ArrayList<FileMainModel> listLibraryImage;
@@ -218,7 +220,12 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, RC_SIGN_IN);
                 break;
             case R.id.itemLogout:
-                signOut();
+                if(isLoginSuccess == true){
+                    signOut();
+                }else{
+                    alertView("Bạn vui lòng đăng nhập trước",getDrawable(R.drawable.ic_fail),"Thất bại" );
+                }
+
                 break;
             default:
                 break;
@@ -345,6 +352,7 @@ public class MainActivity extends AppCompatActivity
                             // Sign in success, update UI with the signed-in user's information
                             Log.e(TAG, "[signInWithCredential:success]");
                             FirebaseUser user = firebaseAuth.getCurrentUser();
+                            isLoginSuccess = true;
                             user.getIdToken(true).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                                 @Override
                                 public void onSuccess(GetTokenResult result) {
@@ -356,6 +364,8 @@ public class MainActivity extends AppCompatActivity
                                 }
                             });
                         } else {
+                            isLoginSuccess = false;
+                            alertView("Đăng nhập nhất bại",getDrawable(R.drawable.ic_fail),"Thất bại" );
                             // If sign in fails, display a message to the user.
                             Log.e(TAG, "[signInWithCredential:failure]", task.getException());
                         }
@@ -583,6 +593,7 @@ public class MainActivity extends AppCompatActivity
             String personId = acct.getId();
             Uri personPhoto = acct.getPhotoUrl();
             Picasso.with(this).load(personPhoto).into(imgAvatar);
+            alertView("Đăng nhập thành công", getDrawable(R.drawable.ic_success), "Thành công");
         } else {
             imgAvatar.setImageResource(R.drawable.ic_account_circle);
         }
@@ -591,10 +602,12 @@ public class MainActivity extends AppCompatActivity
     private void signOut() {
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @SuppressLint("UseCompatLoadingForDrawables")
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         updateUI(null);
 //                        revokeAccess();
+                        alertView("Đăng xuất thành công", getDrawable(R.drawable.ic_success), "Thành công");
                     }
                 });
     }
@@ -613,15 +626,13 @@ public class MainActivity extends AppCompatActivity
         String result = "";
         if (url.contains("Screenshot")) {
             result = Constant.SCREEN_SHOTS;
-        }
-        else if (url.contains("Messenger")) {
+        } else if (url.contains("Messenger")) {
             result = Constant.MESSENGER;
-        }
-        else if (url.contains("Picture")) {
+        } else if (url.contains("Picture")) {
             result = Constant.CAMERA;
         } else if (url.contains("Facebook")) {
             result = Constant.FACEBOOK;
-        }else if(url.contains("Zalo")){
+        } else if (url.contains("Zalo")) {
             result = Constant.ZALO;
         }
         return result;
@@ -677,6 +688,17 @@ public class MainActivity extends AppCompatActivity
         if (listLibraryImage.size() % 10 == 0) {
             isLoad = false;
         }
+    }
+
+    private void alertView(String message, Drawable icon, String title) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(title)
+                .setIcon(icon)
+                .setMessage(message)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialoginterface, int i) {
+                    }
+                }).show();
     }
 }
 
