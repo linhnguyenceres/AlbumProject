@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -129,6 +130,8 @@ public class SearchActivity extends Activity {
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                 Timer timer = new Timer();
+                 final long DELAY = 1000; // Milliseconds
                 if (i == 0) {
                     // check if we reached the top or bottom of the list
                     View v = list.getChildAt(0);
@@ -143,9 +146,24 @@ public class SearchActivity extends Activity {
                     if (offset == 0) {
                         if (isLoad == false) {
                             isLoad = true;
-                            loadListImage(offsetList, limitList);
-//                            isLoad = false;
-                            return;
+                            timer.cancel();
+                            timer = new Timer();
+                            timer.schedule(
+                                    new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            handler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    loadListImage(offsetList, limitList);
+                                                    isLoad = false;
+                                                    ((BaseAdapter) list.getAdapter()).notifyDataSetChanged();
+                                                }
+                                            });
+                                        }
+                                    },
+                                    DELAY
+                            );
                         }
                     }
                 }
@@ -180,7 +198,7 @@ public class SearchActivity extends Activity {
                 getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,  MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+searchText+"%"}, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
 //                getApplication().getContentResolver().query(MediaStore.Video.Media.INTERNAL_CONTENT_URI, columns, null, null, null)
         });
-        if (cursor.getCount() == 0) {
+        if (cursor.moveToFirst() == false) {
             isMore = false;
             return;
         }
