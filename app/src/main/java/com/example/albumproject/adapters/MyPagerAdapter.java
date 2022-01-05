@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+
+import com.example.albumproject.fragments.FragmentCreateStory;
 import com.example.albumproject.fragments.FragmentImage;
 import com.example.albumproject.fragments.FragmentListImage;
 import com.example.albumproject.models.FileMainModel;
@@ -34,6 +36,8 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 return new FragmentListImage(listLibraryImage);
             case 2:
+                return new FragmentCreateStory();
+            case 3:
                 return new FragmentSetting();
             default:
                 return new FragmentImage(listImageData);
@@ -42,7 +46,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -56,6 +60,9 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
                 title = "Tập ảnh";
                 break;
             case 2:
+                title = "Tạo story";
+                break;
+            case 3:
                 title = "Cài đặt";
                 break;
         }
