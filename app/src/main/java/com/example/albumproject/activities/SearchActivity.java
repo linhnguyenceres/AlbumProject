@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -34,6 +35,11 @@ import com.example.albumproject.R;
 import com.example.albumproject.adapters.SearchItemAdapter;
 import com.example.albumproject.models.FileModel;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -73,7 +79,7 @@ public class SearchActivity extends Activity {
         list.setAdapter(adapter);
     }
 
-    void handleSearch(){
+    void handleSearch() {
         offsetList = 0;
         listImage.clear();
         ((BaseAdapter) list.getAdapter()).notifyDataSetChanged();
@@ -97,6 +103,7 @@ public class SearchActivity extends Activity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 searchText = charSequence.toString();
             }
+
             private Timer timer = new Timer();
             private final long DELAY = 1000; // Milliseconds
 
@@ -129,6 +136,8 @@ public class SearchActivity extends Activity {
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                Timer timer = new Timer();
+                final long DELAY = 1000; // Milliseconds
                 if (i == 0) {
                     // check if we reached the top or bottom of the list
                     View v = list.getChildAt(0);
@@ -143,9 +152,24 @@ public class SearchActivity extends Activity {
                     if (offset == 0) {
                         if (isLoad == false) {
                             isLoad = true;
-                            loadListImage(offsetList, limitList);
-//                            isLoad = false;
-                            return;
+                            timer.cancel();
+                            timer = new Timer();
+                            timer.schedule(
+                                    new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            handler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    loadListImage(offsetList, limitList);
+                                                    isLoad = false;
+                                                    ((BaseAdapter) list.getAdapter()).notifyDataSetChanged();
+                                                }
+                                            });
+                                        }
+                                    },
+                                    DELAY
+                            );
                         }
                     }
                 }
@@ -175,12 +199,12 @@ public class SearchActivity extends Activity {
         };
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         MergeCursor cursor = new MergeCursor(new Cursor[]{
-//                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, null),
+//                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+searchText+"%"}, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
 //                getApplication().getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, columns, null, null, null),
-                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,  MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+searchText+"%"}, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
+                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, MediaStore.Images.Media.DATA + " like ? ", new String[]{"%" + searchText + "%"}, orderBy + " ASC LIMIT " + limit + " OFFSET " + skip),
 //                getApplication().getContentResolver().query(MediaStore.Video.Media.INTERNAL_CONTENT_URI, columns, null, null, null)
         });
-        if (cursor.getCount() == 0) {
+        if (cursor.moveToFirst() == false) {
             isMore = false;
             return;
         }
@@ -190,9 +214,11 @@ public class SearchActivity extends Activity {
             String url = cursor.getString(column_index);
             column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             String name = cursor.getString(column_index);
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            String date = cursor.getString(column_index);
-            FileModel data = new FileModel(name, url, date);
+            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+            Long date = cursor.getLong(column_index);
+            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+            Long dateAdd = cursor.getLong(column_index);
+            FileModel data = new FileModel(name, url, dateAdd);
             listImage.add(data);
             cursor.moveToNext();
         }

@@ -1,11 +1,15 @@
 package com.example.albumproject.activities;
 
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,19 +19,23 @@ import android.database.Cursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -67,12 +75,17 @@ import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -81,6 +94,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
+
+import android.provider.MediaStore.Images;
 
 public class MainActivity extends AppCompatActivity
         implements PopupMenu.OnMenuItemClickListener {
@@ -92,7 +107,7 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     //    int REQUEST_PERMISSION = 11;
     ArrayList<FileMainModel> listImage;
-    int limitList = 10;
+    int limitList = 10000;
     int offsetList = 0;
     boolean isMore = true;
     boolean isLoad = false;
@@ -107,6 +122,7 @@ public class MainActivity extends AppCompatActivity
     //capture a photo
     public static final int REQUEST_PERMISSION = 11;
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 100;
+    public static final int MY_PERMISSIONS_REQUEST_WRITE = 101;
     public static final String ALLOW_KEY = "ALLOWED";
     public static final String CAMERA_PREF = "camera_pref";
     private String mCurrentPhotoPath;
@@ -220,10 +236,10 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, RC_SIGN_IN);
                 break;
             case R.id.itemLogout:
-                if(isLoginSuccess == true){
+                if (isLoginSuccess == true) {
                     signOut();
-                }else{
-                    alertView("Bạn vui lòng đăng nhập trước",getDrawable(R.drawable.ic_fail),"Thất bại" );
+                } else {
+                    alertView("Bạn vui lòng đăng nhập trước", getDrawable(R.drawable.ic_fail), "Thất bại");
                 }
 
                 break;
@@ -236,7 +252,7 @@ public class MainActivity extends AppCompatActivity
 
     public void loadListImage(int skip, int limit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_PERMISSION);
             return;
@@ -244,7 +260,7 @@ public class MainActivity extends AppCompatActivity
         int item = this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         boolean permission = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED;
+                PERMISSION_GRANTED;
         final String[] columns = {MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DATE_ADDED,
                 MediaStore.Images.Media.BUCKET_ID,
@@ -254,8 +270,12 @@ public class MainActivity extends AppCompatActivity
                 MediaStore.Images.Media.DATE_TAKEN
         };
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
+//        MergeCursor cursor = new MergeCursor(new Cursor[]{
+//                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " ASC LIMIT " + limit + " OFFSET " + skip),
+//        });
+
         MergeCursor cursor = new MergeCursor(new Cursor[]{
-                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
+                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC"),
         });
         if (cursor.getCount() == 0) {
             isMore = false;
@@ -297,7 +317,7 @@ public class MainActivity extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_PERMISSION: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
                     loadListImage(offsetList, limitList);
                     loadListLibraryImage(offsetList, limitList);
                 } else {
@@ -325,10 +345,13 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-
+            case MY_PERMISSIONS_REQUEST_WRITE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openCamera();
+                } else {
+                }
+                // other 'case' lines to check for other
+                // permissions this app might request
         }
     }
 
@@ -337,7 +360,7 @@ public class MainActivity extends AppCompatActivity
         if (sender.equals("FRAGMENT_IMAGE")) {
             if (strValue.equals("loadMore")) {
                 loadListImage(offsetList, limitList);
-                loadListLibraryImage(offsetList, limitList);
+//                loadListLibraryImage(offsetList, limitList);
             }
         }
     }
@@ -365,7 +388,7 @@ public class MainActivity extends AppCompatActivity
                             });
                         } else {
                             isLoginSuccess = false;
-                            alertView("Đăng nhập nhất bại",getDrawable(R.drawable.ic_fail),"Thất bại" );
+                            alertView("Đăng nhập nhất bại", getDrawable(R.drawable.ic_fail), "Thất bại");
                             // If sign in fails, display a message to the user.
                             Log.e(TAG, "[signInWithCredential:failure]", task.getException());
                         }
@@ -391,18 +414,25 @@ public class MainActivity extends AppCompatActivity
 //            Bitmap photo  = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
 //            Bitmap photo = (Bitmap) data.getExtras().get("data");
 
-
             Bitmap photo = null;
             try {
-                photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(mCurrentPhotoPath));
+                File file1 = new File(mCurrentPhotoPath);
+                if (file1.exists()) {
+                    Log.e("IMAGE", file1.toString());
+                }
+                photo = BitmapFactory.decodeFile(mCurrentPhotoPath);
+//                SaveImage(photo);
+
+                long millis = System.currentTimeMillis();
+                String fname = "Image-" + millis + ".jpg";
+                saveBitmap(this, photo, Bitmap.CompressFormat.JPEG, "image/jpeg", fname);
+
                 Log.e("IMAGE", photo.toString());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            SaveImage(photo);
         }
     }
-
 
     public static void saveToPreferences(Context context, String key,
                                          Boolean allowed) {
@@ -492,6 +522,7 @@ public class MainActivity extends AppCompatActivity
                     photoURI = FileProvider.getUriForFile(this,
                             BuildConfig.APPLICATION_ID + ".provider", photoFile);
 
+
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                     startActivityForResult(takePictureIntent, CAPTURE_IMAGE_REQUEST);
                 }
@@ -505,7 +536,7 @@ public class MainActivity extends AppCompatActivity
     public void checkPermissionAndOpenCamera() {
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PERMISSION_GRANTED) {
 
             if (getFromPref(MainActivity.this, ALLOW_KEY)) {
 
@@ -513,7 +544,7 @@ public class MainActivity extends AppCompatActivity
 
             } else if (ContextCompat.checkSelfPermission(MainActivity.this,
                     Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PERMISSION_GRANTED) {
                 // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                         Manifest.permission.CAMERA)) {
@@ -525,6 +556,13 @@ public class MainActivity extends AppCompatActivity
                             MY_PERMISSIONS_REQUEST_CAMERA);
                 }
             }
+
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION);
+            return;
         } else {
             openCamera();
         }
@@ -544,30 +582,110 @@ public class MainActivity extends AppCompatActivity
         return image;
     }
 
+    private static void galleryAddPic(Context context, String imagePath) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(imagePath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+    }
+
     private void SaveImage(Bitmap finalBitmap) {
 
         String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/saved_images");
+        File myDir = new File(root + "/Albumproject");
         if (!myDir.exists()) {
             myDir.mkdirs();
         }
         Random generator = new Random();
-        int n = 10000;
-        n = generator.nextInt(n);
-        String fname = "Image-" + n + ".jpg";
-        File file = new File(myDir, fname);
-        if (file.exists())
-            file.delete();
+        long millis = System.currentTimeMillis() % 1000;
+        String fname = "Image-" + millis + ".jpg";
+        File imageFile = new File(myDir, fname);
+        String savedImagePath = null;
+        savedImagePath = imageFile.getAbsolutePath();
         try {
-            FileOutputStream out = new FileOutputStream(file);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.flush();
-            out.close();
-
+            OutputStream fOut = new FileOutputStream(imageFile);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+            fOut.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Add the image to the system gallery
+        galleryAddPic(this, savedImagePath);
+
+        // Show a Toast with the save location
+        // String savedMessage = context.getString(R.string.saved_message, savedImagePath);
     }
+
+    public Uri saveBitmap(@NonNull final Context context, @NonNull final Bitmap bitmap,
+                          @NonNull final Bitmap.CompressFormat format,
+                          @NonNull final String mimeType,
+                          @NonNull final String displayName) throws IOException {
+
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AlbumProject");
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+        values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+        values.put(Images.Media.DATE_ADDED, System.currentTimeMillis());
+        values.put(Images.Media.DATE_TAKEN, System.currentTimeMillis());
+//        LocalDate date2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault()).toLocalDate();
+//        Log.d("OK",DateTimeFormatter.ofPattern("dd MMMM yyyy").format(date2));
+        final ContentResolver resolver = context.getContentResolver();
+        Uri uri = null;
+
+        try {
+            final Uri contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            uri = resolver.insert(contentUri, values);
+            if (uri == null)
+                throw new IOException("Failed to create new MediaStore record.");
+
+            try (final OutputStream stream = resolver.openOutputStream(uri)) {
+                if (stream == null)
+                    throw new IOException("Failed to open output stream.");
+
+                if (!bitmap.compress(format, 95, stream))
+                    throw new IOException("Failed to save bitmap.");
+            }
+
+            Cursor cursor = null;
+            try {
+                final String[] columns = {MediaStore.Images.Media.DATA,
+                        MediaStore.Images.Media.DATE_ADDED,
+                        MediaStore.Images.Media.BUCKET_ID,
+                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+                        MediaStore.Images.Media.DISPLAY_NAME,
+                        MediaStore.Images.Media.SIZE,
+                        MediaStore.Images.Media.DATE_TAKEN
+                };
+                cursor = getContentResolver().query(uri, columns, null, null, null);
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                Log.e("OK", cursor.getString(column_index));
+                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
+                String date = cursor.getString(column_index);
+                Log.e("OK", date);
+                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+                Long millis1 = cursor.getLong(column_index);
+                LocalDate date1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis1), ZoneId.systemDefault()).toLocalDate();
+                Log.e("OK", DateTimeFormatter.ofPattern("dd MMMM yyyy").format(date1));
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            return uri;
+        } catch (IOException e) {
+
+            if (uri != null) {
+                // Don't leave an orphan entry in the MediaStore
+                resolver.delete(uri, null, null);
+            }
+            throw e;
+        }
+    }
+
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
@@ -612,16 +730,6 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-//    private void revokeAccess() {
-//        mGoogleSignInClient.revokeAccess()
-//                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//
-//                    }
-//                });
-//    }
-
     private String getLibraryName(String url) {
         String result = "";
         if (url.contains("Screenshot")) {
@@ -640,7 +748,7 @@ public class MainActivity extends AppCompatActivity
 
     public void loadListLibraryImage(int skip, int limit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_PERMISSION);
             return;
@@ -670,8 +778,6 @@ public class MainActivity extends AppCompatActivity
             ImageData data = new ImageData(name, url, "date");
             LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).toLocalDate();
             FileMainModel itemLibraryImage = new FileMainModel(date, getLibraryName(url.toString()));
-
-
             FileMainModel imageLibraryExist = listLibraryImage.stream()
                     .filter(image -> getLibraryName(url).equals(getLibraryName(image.files.toString())))
                     .findAny()
