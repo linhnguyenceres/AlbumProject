@@ -3,6 +3,7 @@ package com.example.albumproject.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,12 @@ import com.example.albumproject.models.FileModel;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class SearchItemAdapter extends BaseAdapter {
@@ -60,8 +67,9 @@ public class SearchItemAdapter extends BaseAdapter {
         }
         TextView txtName = view.findViewById(R.id.txtName);
         txtName.setText(file.name);
-//        TextView txtDate = view.findViewById(R.id.txtDate);
-//        txtDate.setText(file.date);
+        TextView txtDate = view.findViewById(R.id.txtDate);
+        LocalDate date = LocalDateTime.ofInstant(Instant.ofEpochMilli(file.date), ZoneId.systemDefault()).toLocalDate();
+        txtDate.setText(DateTimeFormatter.ofPattern("dd MMMM yyyy").format(date));
 
         return view;
     }

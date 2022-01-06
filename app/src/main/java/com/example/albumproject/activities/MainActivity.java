@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,10 +30,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -91,6 +95,8 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
 
+import android.provider.MediaStore.Images;
+
 public class MainActivity extends AppCompatActivity
         implements PopupMenu.OnMenuItemClickListener {
     TextView txtTitle;
@@ -101,7 +107,7 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     //    int REQUEST_PERMISSION = 11;
     ArrayList<FileMainModel> listImage;
-    int limitList = 10;
+    int limitList = 10000;
     int offsetList = 0;
     boolean isMore = true;
     boolean isLoad = false;
@@ -230,10 +236,10 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, RC_SIGN_IN);
                 break;
             case R.id.itemLogout:
-                if(isLoginSuccess == true){
+                if (isLoginSuccess == true) {
                     signOut();
-                }else{
-                    alertView("Bạn vui lòng đăng nhập trước",getDrawable(R.drawable.ic_fail),"Thất bại" );
+                } else {
+                    alertView("Bạn vui lòng đăng nhập trước", getDrawable(R.drawable.ic_fail), "Thất bại");
                 }
 
                 break;
@@ -264,8 +270,12 @@ public class MainActivity extends AppCompatActivity
                 MediaStore.Images.Media.DATE_TAKEN
         };
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
+//        MergeCursor cursor = new MergeCursor(new Cursor[]{
+//                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " ASC LIMIT " + limit + " OFFSET " + skip),
+//        });
+
         MergeCursor cursor = new MergeCursor(new Cursor[]{
-                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC LIMIT " + limit + " OFFSET " + skip),
+                getApplication().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC"),
         });
         if (cursor.getCount() == 0) {
             isMore = false;
@@ -350,7 +360,7 @@ public class MainActivity extends AppCompatActivity
         if (sender.equals("FRAGMENT_IMAGE")) {
             if (strValue.equals("loadMore")) {
                 loadListImage(offsetList, limitList);
-                loadListLibraryImage(offsetList, limitList);
+//                loadListLibraryImage(offsetList, limitList);
             }
         }
     }
@@ -378,7 +388,7 @@ public class MainActivity extends AppCompatActivity
                             });
                         } else {
                             isLoginSuccess = false;
-                            alertView("Đăng nhập nhất bại",getDrawable(R.drawable.ic_fail),"Thất bại" );
+                            alertView("Đăng nhập nhất bại", getDrawable(R.drawable.ic_fail), "Thất bại");
                             // If sign in fails, display a message to the user.
                             Log.e(TAG, "[signInWithCredential:failure]", task.getException());
                         }
@@ -613,20 +623,21 @@ public class MainActivity extends AppCompatActivity
                           @NonNull final String mimeType,
                           @NonNull final String displayName) throws IOException {
 
-        final ContentValues values = new ContentValues();
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AlbumProject");
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-        values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
-        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
-        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AlbumProject");
-
+        values.put(Images.Media.DATE_ADDED, System.currentTimeMillis());
+        values.put(Images.Media.DATE_TAKEN, System.currentTimeMillis());
+//        LocalDate date2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault()).toLocalDate();
+//        Log.d("OK",DateTimeFormatter.ofPattern("dd MMMM yyyy").format(date2));
         final ContentResolver resolver = context.getContentResolver();
         Uri uri = null;
 
         try {
             final Uri contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             uri = resolver.insert(contentUri, values);
-
             if (uri == null)
                 throw new IOException("Failed to create new MediaStore record.");
 
@@ -664,7 +675,6 @@ public class MainActivity extends AppCompatActivity
                     cursor.close();
                 }
             }
-
             return uri;
         } catch (IOException e) {
 
@@ -676,13 +686,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {

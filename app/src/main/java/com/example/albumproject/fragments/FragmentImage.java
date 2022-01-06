@@ -11,11 +11,16 @@ import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -38,12 +43,15 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FragmentImage extends Fragment {
 
     Context context;
     MainActivity main;
     boolean isLoad = false;
+    final Handler handler = new Handler(Looper.getMainLooper());
 
 
 //    int[] myImages = {R.mipmap.ic_example,
@@ -73,12 +81,15 @@ public class FragmentImage extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
 
-        ListView listVew = (ListView) rootView.findViewById(R.id.list);
+        ListView listView = (ListView) rootView.findViewById(R.id.list);
 
         TabImageParentAdapter adapter = new TabImageParentAdapter(getActivity(), list);
-        listVew.setAdapter(adapter);
+        listView.setAdapter(adapter);
 
-        listVew.setOnScrollListener(new AbsListView.OnScrollListener() {
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            Timer timer = new Timer();
+            final long DELAY = 1000; // Milliseconds
+
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
 
@@ -86,26 +97,61 @@ public class FragmentImage extends Fragment {
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-                if (i == 0) {
-                    // check if we reached the top or bottom of the list
-                    View v = listVew.getChildAt(0);
-                    int offset = (v == null) ? 0 : v.getTop();
-                    if (offset == 0) {
-                        // reached the top:
-                        return;
-                    }
-                } else if (i2 - i1 == i) {
-                    View v = listVew.getChildAt(i2 - 2);
-                    int offset = (v == null) ? 0 : v.getTop();
-                    if (offset == 0) {
-                        if (isLoad == false) {
-                            isLoad = true;
-                            main.onMsgFromFragToMain("FRAGMENT_IMAGE","loadMore");
-                            isLoad = false;
-                            return;
-                        }
-                    }
-                }
+//                if (isLoad == false) {
+//
+//                    if (i == 0 && i1 <= 1) {
+//                        // check if we reached the top or bottom of the list
+//                        View v = listView.getChildAt(0);
+//                        int offset = (v == null) ? 0 : v.getBottom();
+//                        int height = absListView.getHeight();
+//                        if (offset == height) {
+//                            isLoad = true;
+//                            timer = new Timer();
+//                            timer.schedule(
+//                                    new TimerTask() {
+//                                        @Override
+//                                        public void run() {
+//                                            handler.post(new Runnable() {
+//                                                @Override
+//                                                public void run() {
+//                                                    main.onMsgFromFragToMain("FRAGMENT_IMAGE", "loadMore");
+//                                                    isLoad = false;
+//                                                    ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+//                                                }
+//                                            });
+//                                        }
+//                                    },
+//                                    DELAY
+//                            );
+//                        }
+//                    } else if (i2 - i1 == i) {
+//                        View v = listView.getChildAt(i2 - 1);
+//                        int offset = (v == null) ? 0 : v.getBottom();
+//                        int height = absListView.getHeight();
+//                        if (offset == height) {
+//                            if (isLoad == false) {
+//                                isLoad = true;
+//                                timer = new Timer();
+//                                timer.schedule(
+//                                        new TimerTask() {
+//                                            @Override
+//                                            public void run() {
+//                                                handler.post(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//                                                        main.onMsgFromFragToMain("FRAGMENT_IMAGE", "loadMore");
+//                                                        isLoad = false;
+//                                                        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+//                                                    }
+//                                                });
+//                                            }
+//                                        },
+//                                        DELAY
+//                                );
+//                            }
+//                        }
+//                    }
+//                }
             }
         });
 
