@@ -51,6 +51,7 @@
             android:label="Search"
             android:parentActivityName=".activities.MainActivity" />
         <!--        <activity android:name=".activities.SplashActivity"/>-->
+        <activity android:name=".activities.ImageDetailActivity" />
     </application>
 
 </manifest>
