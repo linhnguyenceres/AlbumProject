@@ -23,45 +23,17 @@
         app:layout_constraintRight_toRightOf="@id/imageBack"
         app:layout_constraintTop_toTopOf="@id/imageBack" />
 
-    <ImageView
-        android:id="@+id/imgPicture"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="@dimen/dimen_40"
-        android:layout_marginLeft="@dimen/dimen_8"
-        android:src="@mipmap/ic_example"
+    <com.example.albumproject.customs.TouchImageView
+        android:id="@+id/imViewedImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnBack" />
-
-    <Button
-        android:id="@+id/zoomInButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#AB4CAF50"
-        android:padding="5dp"
-        android:text="zoomIn"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        android:layout_marginBottom="@dimen/dimen_30"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/zoomOutButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgPicture"
-        app:layout_constraintVertical_bias="0.76" />
+        android:layout_marginTop="@dimen/dimen_10" />
 
-    <Button
-        android:id="@+id/zoomOutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#AB4CAF50"
-        android:padding="5dp"
-        android:text="zoomOut"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.77"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgPicture"
-        app:layout_constraintVertical_bias="0.76" />
 </androidx.constraintlayout.widget.ConstraintLayout>
