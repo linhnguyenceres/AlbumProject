@@ -1,10 +1,15 @@
 package com.example.albumproject.fragments;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,6 +18,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.albumproject.R;
+import com.example.albumproject.models.FileModel;
+import com.example.albumproject.models.FolderMainModel;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 public class FragmentDetailListImage extends Fragment {
 
@@ -22,12 +32,23 @@ public class FragmentDetailListImage extends Fragment {
     protected FragmentDetailListImage.CustomDetailAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
     protected String[] mDataset;
+    FolderMainModel item;
+    Context ctx;
+
+    ArrayList<FileModel> list;
+
+    public FragmentDetailListImage(Context ctx, FolderMainModel item) {
+        this.item = item;
+        this.ctx = ctx;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         initDataset();
+
+        this.list = this.getAllImagesByFolder(this.item.getPath());
     }
 
     @Override
@@ -38,7 +59,7 @@ public class FragmentDetailListImage extends Fragment {
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewDetailListImage);
 
-        mAdapter = new FragmentDetailListImage.CustomDetailAdapter(mDataset);
+        mAdapter = new FragmentDetailListImage.CustomDetailAdapter(list);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getActivity(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -70,9 +91,10 @@ public class FragmentDetailListImage extends Fragment {
     public class CustomDetailAdapter extends RecyclerView.Adapter<FragmentDetailListImage.CustomDetailAdapter.ViewHolder> {
         private static final String TAG = "CustomAdapter";
 
-        private String[] mDataSet;
+        private ArrayList<FileModel> mDataSet;
 
         public class ViewHolder extends RecyclerView.ViewHolder {
+            private final ImageView imgView;
 
             public ViewHolder(View v) {
                 super(v);
@@ -83,10 +105,15 @@ public class FragmentDetailListImage extends Fragment {
                         Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
                     }
                 });
+
+                imgView = (ImageView) v.findViewById(R.id.imgLibraryItem);
             }
+
+            public ImageView getImgView(){ return this.imgView; }
+
         }
 
-        public CustomDetailAdapter(String[] dataSet) {
+        public CustomDetailAdapter(ArrayList<FileModel> dataSet) {
             mDataSet = dataSet;
         }
 
@@ -102,12 +129,51 @@ public class FragmentDetailListImage extends Fragment {
         @Override
         public void onBindViewHolder(FragmentDetailListImage.CustomDetailAdapter.ViewHolder viewHolder, final int position) {
             Log.d(TAG, "Element " + position + " set.");
+
+            final FileModel folder = mDataSet.get(position);
+
+            Picasso.with(ctx).load("file://" + folder.url).fit().centerCrop().into(viewHolder.getImgView());
         }
 
         @Override
         public int getItemCount() {
-            return mDataSet.length;
+            return mDataSet.size();
         }
+    }
+
+    public ArrayList<FileModel> getAllImagesByFolder(String path){
+        ArrayList<FileModel> images = new ArrayList<>();
+        Uri allVideosuri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.DATE_ADDED,
+                MediaStore.Images.Media.BUCKET_ID,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.SIZE,
+                MediaStore.Images.Media.DATE_TAKEN
+        };;
+        Cursor cursor = this.ctx.getContentResolver().query( allVideosuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+path+"%"}, null);
+        try {
+            cursor.moveToFirst();
+            do{
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                String url = cursor.getString(column_index);
+                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+                String name = cursor.getString(column_index);
+                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+                Long date = cursor.getLong(column_index);
+                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+                Long dateAdd = cursor.getLong(column_index);
+                FileModel data = new FileModel(name, url, dateAdd);
+                images.add(data);
+                cursor.moveToNext();
+
+            }while(cursor.moveToNext());
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return images;
     }
 
 }

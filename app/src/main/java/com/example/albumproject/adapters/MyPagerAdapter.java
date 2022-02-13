@@ -1,5 +1,7 @@
 package com.example.albumproject.adapters;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -10,6 +12,7 @@ import com.example.albumproject.fragments.FragmentImage;
 import com.example.albumproject.fragments.FragmentListImage;
 import com.example.albumproject.models.FileMainModel;
 import com.example.albumproject.fragments.FragmentSetting;
+import com.example.albumproject.models.FolderMainModel;
 
 import java.util.ArrayList;
 
@@ -17,24 +20,29 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     ArrayList<FileMainModel> listImageData;
     ArrayList<FileMainModel> listLibraryImage;
+    ArrayList<FolderMainModel> listFolderImage;
+    Context ctx;
 
     public MyPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
 
-    public MyPagerAdapter(@NonNull FragmentManager fm, int behavior,
+    public MyPagerAdapter(Context ctx,@NonNull FragmentManager fm, int behavior,
                           ArrayList<FileMainModel> listImageData,
-                          ArrayList<FileMainModel> listLibraryImage) {
+                          ArrayList<FileMainModel> listLibraryImage,
+                          ArrayList<FolderMainModel> listFolderImage) {
         super(fm, behavior);
+        this.ctx = ctx;
         this.listImageData = listImageData;
         this.listLibraryImage = listLibraryImage;
+        this.listFolderImage = listFolderImage;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 1:
-                return new FragmentListImage();
+                return new FragmentListImage(listFolderImage,ctx);
             case 2:
                 return new FragmentCreateStory();
             case 3:

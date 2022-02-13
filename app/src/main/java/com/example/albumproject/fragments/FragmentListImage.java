@@ -11,6 +11,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +25,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.albumproject.R;
+import com.example.albumproject.models.FolderMainModel;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 public class FragmentListImage extends Fragment {
+
+
+    ArrayList<FolderMainModel> list;
+    Context ctx;
+    public FragmentListImage(ArrayList<FolderMainModel> list,Context ctx) {
+        this.list = list;
+        this.ctx = ctx;
+    }
 
     private static final String TAG = "RecyclerViewFragment";
 
@@ -49,7 +62,7 @@ public class FragmentListImage extends Fragment {
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewListImage);
 
-        mAdapter = new CustomAdapter(mDataset);
+        mAdapter = new CustomAdapter(this.list);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getActivity(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -81,10 +94,12 @@ public class FragmentListImage extends Fragment {
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
         private static final String TAG = "CustomAdapter";
 
-        private String[] mDataSet;
+        private ArrayList<FolderMainModel> mDataSet;
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             private final TextView textView;
+            private final ImageView imgView;
+            private final TextView textCount;
 
             public ViewHolder(View v) {
                 super(v);
@@ -93,20 +108,25 @@ public class FragmentListImage extends Fragment {
                     public void onClick(View v) {
                         Toast.makeText(getActivity(), "Item " + getAdapterPosition() + " clicked.", Toast.LENGTH_SHORT).show();
                         Fragment fragment = null;
-                        fragment = new FragmentDetailListImage();
+                        fragment = new FragmentDetailListImage(ctx,mDataSet.get(getAdapterPosition()));
                         replaceFragment(fragment);
                     }
                 });
 
                 textView = (TextView) v.findViewById(R.id.tvLibraryName);
+                imgView = (ImageView) v.findViewById(R.id.imgLibraryItem);
+                textCount = (TextView) v.findViewById(R.id.tvCount);
+
             }
 
             public TextView getTextView() {
                 return textView;
             }
+            public ImageView getImageView(){ return imgView; }
+            public TextView getTextCount() { return textCount; }
         }
 
-        public CustomAdapter(String[] dataSet) {
+        public CustomAdapter(ArrayList<FolderMainModel> dataSet) {
             mDataSet = dataSet;
         }
 
@@ -122,13 +142,18 @@ public class FragmentListImage extends Fragment {
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, final int position) {
             Log.d(TAG, "Element " + position + " set.");
+            final FolderMainModel folder = mDataSet.get(position);
 
-            viewHolder.getTextView().setText(mDataSet[position]);
+            Picasso.with(ctx).load("file://" + folder.getFirstPic()).fit().centerCrop().into(viewHolder.getImageView());
+
+            viewHolder.getTextView().setText(folder.getFolderName());
+
+            viewHolder.getTextCount().setText(String.valueOf(folder.getNumberOfPics()));
         }
 
         @Override
         public int getItemCount() {
-            return mDataSet.length;
+            return mDataSet.size();
         }
     }
 
@@ -138,6 +163,4 @@ public class FragmentListImage extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
-
 }
