@@ -34,7 +34,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 1:
-                return new FragmentListImage(listLibraryImage);
+                return new FragmentListImage();
             case 2:
                 return new FragmentCreateStory();
             case 3:

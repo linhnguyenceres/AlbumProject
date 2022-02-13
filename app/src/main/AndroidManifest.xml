@@ -52,6 +52,7 @@
             android:parentActivityName=".activities.MainActivity" />
         <!--        <activity android:name=".activities.SplashActivity"/>-->
         <activity android:name=".activities.ImageDetailActivity" />
+        <activity android:name=".activities.EditImageActivity" />
     </application>
 
 </manifest>

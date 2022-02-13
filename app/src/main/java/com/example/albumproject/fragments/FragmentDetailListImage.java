@@ -1,36 +1,25 @@
 package com.example.albumproject.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.example.albumproject.R;
 
-public class FragmentListImage extends Fragment {
+public class FragmentDetailListImage extends Fragment {
 
     private static final String TAG = "RecyclerViewFragment";
 
     protected RecyclerView mRecyclerView;
-    protected CustomAdapter mAdapter;
+    protected FragmentDetailListImage.CustomDetailAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
     protected String[] mDataset;
 
@@ -44,12 +33,12 @@ public class FragmentListImage extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_list_image, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail_list_image, container, false);
         rootView.setTag(TAG);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewListImage);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewDetailListImage);
 
-        mAdapter = new CustomAdapter(mDataset);
+        mAdapter = new FragmentDetailListImage.CustomDetailAdapter(mDataset);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getActivity(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -78,13 +67,12 @@ public class FragmentListImage extends Fragment {
         mDataset[15] = "Plasma Osmolality";
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
+    public class CustomDetailAdapter extends RecyclerView.Adapter<FragmentDetailListImage.CustomDetailAdapter.ViewHolder> {
         private static final String TAG = "CustomAdapter";
 
         private String[] mDataSet;
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            private final TextView textView;
 
             public ViewHolder(View v) {
                 super(v);
@@ -92,38 +80,28 @@ public class FragmentListImage extends Fragment {
                     @Override
                     public void onClick(View v) {
                         Toast.makeText(getActivity(), "Item " + getAdapterPosition() + " clicked.", Toast.LENGTH_SHORT).show();
-                        Fragment fragment = null;
-                        fragment = new FragmentDetailListImage();
-                        replaceFragment(fragment);
+                        Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
                     }
                 });
-
-                textView = (TextView) v.findViewById(R.id.tvLibraryName);
-            }
-
-            public TextView getTextView() {
-                return textView;
             }
         }
 
-        public CustomAdapter(String[] dataSet) {
+        public CustomDetailAdapter(String[] dataSet) {
             mDataSet = dataSet;
         }
 
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        public FragmentDetailListImage.CustomDetailAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
             // Create a new view.
             View v = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.item_list_image, viewGroup, false);
+                    .inflate(R.layout.item_detail_list_image, viewGroup, false);
 
-            return new ViewHolder(v);
+            return new FragmentDetailListImage.CustomDetailAdapter.ViewHolder(v);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+        public void onBindViewHolder(FragmentDetailListImage.CustomDetailAdapter.ViewHolder viewHolder, final int position) {
             Log.d(TAG, "Element " + position + " set.");
-
-            viewHolder.getTextView().setText(mDataSet[position]);
         }
 
         @Override
@@ -131,13 +109,5 @@ public class FragmentListImage extends Fragment {
             return mDataSet.length;
         }
     }
-
-    public void replaceFragment(Fragment someFragment) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.layoutFullScreen, someFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
 
 }

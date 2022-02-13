@@ -51,4 +51,19 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
+
+    // image filters
+    implementation 'info.androidhive:imagefilters:1.0.7'
+
+    // butter knife
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+
+    // dexter M permissions
+    implementation 'com.karumi:dexter:4.1.0'
+
+    //noinspection GradleCompatible
+    implementation 'com.android.support:recyclerview-v7:26.1.0'
+
+    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
 }

@@ -69,6 +69,9 @@ public class FragmentImage extends Fragment {
         this.list = list;
     }
 
+    public FragmentImage() {
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +83,13 @@ public class FragmentImage extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
-
         ListView listView = (ListView) rootView.findViewById(R.id.list);
 
-        TabImageParentAdapter adapter = new TabImageParentAdapter(getActivity(), list);
-        listView.setAdapter(adapter);
+        if(list != null){
+            TabImageParentAdapter adapter = new TabImageParentAdapter(getActivity(), list);
+            listView.setAdapter(adapter);
+        }
+
 
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             Timer timer = new Timer();
