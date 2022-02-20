@@ -56,14 +56,17 @@ public class FragmentListImage extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    public void changeData(ArrayList<FolderMainModel> list){
+        this.list = list;
+        this.mAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list_image, container, false);
         rootView.setTag(TAG);
-
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewListImage);
-
         mAdapter = new CustomAdapter(this.list);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getActivity(), 2);

@@ -1,47 +1,30 @@
 package com.example.albumproject.activities;
 
-import android.Manifest;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.view.TouchDelegate;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
-
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-
-import com.example.albumproject.BuildConfig;
+import com.dsphotoeditor.sdk.activity.DsPhotoEditorActivity;
+import com.dsphotoeditor.sdk.utils.DsPhotoEditorConstants;
 import com.example.albumproject.R;
 import com.example.albumproject.customs.TouchImageView;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Objects;
 
 public class ImageDetailActivity extends Activity {
     View btnBack;
@@ -102,7 +85,7 @@ public class ImageDetailActivity extends Activity {
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(ImageDetailActivity.this, EditImageActivity.class));
+                pickImage();
             }
         });
 
@@ -115,77 +98,38 @@ public class ImageDetailActivity extends Activity {
     }
 
     private void alertView(String message, Drawable icon, String title) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        File file = new File(url);
+                        final String where = MediaStore.MediaColumns.DATA + "=?";
+                        final String[] selectionArgs = new String[]{
+                                file.getAbsolutePath()
+                        };
+                        final ContentResolver contentResolver = getContentResolver();
+                        final Uri filesUri = MediaStore.Files.getContentUri("external");
+                        contentResolver.delete(filesUri, where, selectionArgs);
+                        ImageDetailActivity.super.onBackPressed();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle(title)
                 .setIcon(icon)
                 .setMessage(message)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialoginterface, int i) {
-                        deletePhoto(url);
-//                        String path = urlPath;
-//                        File file = new File(path);
-//                        if (ContextCompat.checkSelfPermission(ImageDetailActivity.this
-//                                , Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                            file.delete();
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        }
-
-//                        File file = new File(url);
-//                        if(file.exists()){
-//                            deleteFile(url);
-//                            Log.e("filedel", "file Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }
-
-//                        File file = new File(url);
-//                        Log.e("filePath", file.getAbsolutePath());
-//                        if (file.exists()) {
-//                            file.delete();
-//                            deleteDirectory(file);
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        } else {
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
-//                        if(deleteDirectory(file)){
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
-//                        final String where = MediaStore.MediaColumns.DATA + "=?";
-//                        final String[] selectionArgs = new String[]{
-//                                file.getAbsolutePath()
-//                        };
-//                        final ContentResolver contentResolver = getContentResolver();
-//                        final Uri filesUri = MediaStore.Files.getContentUri("external");
-//                        contentResolver.delete(filesUri, where, selectionArgs);
-                    }
-                }).show();
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
-    static public boolean deleteDirectory(File path) {
-        if (path.exists()) {
-            File[] files = path.listFiles();
-            for (int i = 0; i < Objects.requireNonNull(files).length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteDirectory(files[i]);
-                } else {
-                    files[i].delete();
-                }
-            }
-        }
-        return (path.delete());
-    }
 
     private void image() {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -215,20 +159,17 @@ public class ImageDetailActivity extends Activity {
         startActivity(Intent.createChooser(shareint, "share image"));
     }
 
-    private Boolean deletePhoto(String fileName) {
-        Boolean result = false;
-        try {
-            deleteFile(fileName);
-            result = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            result = false;
-        }
-        return result;
+    private void pickImage(){
+        Intent intent = new Intent(ImageDetailActivity.this, DsPhotoEditorActivity.class);
+        intent.setData(Uri.parse(urlPath));
+        intent.putExtra(DsPhotoEditorConstants.DS_PHOTO_EDITOR_OUTPUT_DIRECTORY, "Images");
+        intent.putExtra(DsPhotoEditorConstants.DS_TOOL_BAR_BACKGROUND_COLOR, Color.parseColor("#FF6200EE"));
+        intent.putExtra(DsPhotoEditorConstants.DS_MAIN_BACKGROUND_COLOR, Color.parseColor("#FFFFFF"));
+        intent.putExtra(DsPhotoEditorConstants.DS_PHOTO_EDITOR_TOOLS_TO_HIDE, new int[]{
+                DsPhotoEditorActivity.TOOL_WARMTH, DsPhotoEditorActivity.TOOL_PIXELATE
+        });
+        startActivity(intent);
     }
-
-
-
 }
 
 

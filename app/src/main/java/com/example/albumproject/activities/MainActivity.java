@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
     File photoFile = null;
     Uri photoURI = null;
     Boolean isLoginSuccess = false;
-
+    MyPagerAdapter adapter;
 
     ArrayList<FileMainModel> listLibraryImage;
     ArrayList<FolderMainModel> listFolderImage;
@@ -155,6 +155,18 @@ public class MainActivity extends AppCompatActivity
         getViews();
         addControl();
         initClick();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        listImage.clear();
+        listLibraryImage.clear();
+        loadListImage(offsetList, limitList);
+        loadListLibraryImage(offsetList, limitList);
+        listFolderImage = getPicturePaths();
+        this.adapter.setNewData(listImage, listLibraryImage,listFolderImage);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -182,7 +194,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addControl() {
-        MyPagerAdapter adapter = new MyPagerAdapter(getApplicationContext(),getSupportFragmentManager(),
+        adapter = new MyPagerAdapter(getApplicationContext(),getSupportFragmentManager(),
                 FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, listImage, listLibraryImage,listFolderImage);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -860,7 +872,5 @@ public class MainActivity extends AppCompatActivity
                     }
                 }).show();
     }
-
-
 }
 

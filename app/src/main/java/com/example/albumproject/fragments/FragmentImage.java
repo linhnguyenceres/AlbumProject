@@ -39,6 +39,7 @@ import com.example.albumproject.adapters.TabImageParentAdapter;
 import com.example.albumproject.data.ImageData;
 import com.example.albumproject.models.FileMainModel;
 import com.example.albumproject.models.FileModel;
+import com.example.albumproject.models.FolderMainModel;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class FragmentImage extends Fragment {
     MainActivity main;
     boolean isLoad = false;
     final Handler handler = new Handler(Looper.getMainLooper());
-
+    ListView listView;
 
 //    int[] myImages = {R.mipmap.ic_example,
 //            R.mipmap.ic_example,
@@ -78,12 +79,17 @@ public class FragmentImage extends Fragment {
         main = (MainActivity) getActivity();
     }
 
+    public void changeData(ArrayList<FileMainModel> list){
+        this.list = list;
+        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_image, container, false);
-        ListView listView = (ListView) rootView.findViewById(R.id.list);
+        listView = (ListView) rootView.findViewById(R.id.list);
 
         if(list != null){
             TabImageParentAdapter adapter = new TabImageParentAdapter(getActivity(), list);

@@ -3,9 +3,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        flatDir{
-            dirs 'libs'
-        }
+
+        flatDir { dirs 'libs'}
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.2"
@@ -15,6 +14,7 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir
