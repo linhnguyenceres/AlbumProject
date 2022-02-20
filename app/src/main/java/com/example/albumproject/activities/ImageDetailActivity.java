@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.TouchDelegate;
@@ -51,6 +52,7 @@ public class ImageDetailActivity extends Activity {
     View btnDelete;
     String urlPath;
     private static Context mContext;
+
 
 
     @Override
@@ -94,50 +96,7 @@ public class ImageDetailActivity extends Activity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                try {
-//                    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-//                    sharingIntent.setType("image/*");
-//                    sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(urlPath));
-//                    startActivity(Intent.createChooser(sharingIntent, "Share Image:"));
-//                } catch (Exception e) {
-//                    Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    Log.e("ERROR", e.getMessage());
-//                }
-
-//                Intent share = new Intent(Intent.ACTION_SEND);
-//                share.setType("image/*");
-////                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-////                url.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-////                File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
-////                try {
-////                    f.createNewFile();
-////                    FileOutputStream fo = new FileOutputStream(f);
-////                    fo.write(bytes.toByteArray());
-////                } catch (IOException e) {
-////                    e.printStackTrace();
-////                }
-//                share.putExtra(Intent.EXTRA_STREAM, Uri.parse(urlPath));
-//                startActivity(Intent.createChooser(share, "Share Image"));
-                //                File file = new File(url);
-//                Uri uri;// w w w.j  a v a 2  s. co m
-//                if (Build.VERSION.SDK_INT >= 24) {
-//                    uri = FileProvider.getUriForFile(mContext,
-//                            BuildConfig.APPLICATION_ID + ".provider", file);
-//                } else {
-//                    uri = Uri.fromFile(file);
-//                }
-
-                try {
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    File file1 = new File(url);
-                    String abs = file1.getAbsolutePath();
-                    Uri uri = Uri.parse("file:/" + abs);
-                    intent.putExtra(Intent.EXTRA_STREAM, uri);
-                    intent.setType("image/*");
-                    startActivity(Intent.createChooser(intent, "Share image"));
-                } catch (Exception e) {
-                    Log.e("ERROR", e.getMessage());
-                }
+                image();
             }
         });
 
@@ -226,6 +185,34 @@ public class ImageDetailActivity extends Activity {
             }
         }
         return (path.delete());
+    }
+
+    private void image() {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
+        BitmapDrawable drawable = (BitmapDrawable) imViewedImage.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+
+        File f = new File(getExternalCacheDir() + "/" + getResources().getString(R.string.app_name) + ".png");
+        Intent shareint;
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            shareint = new Intent(Intent.ACTION_SEND);
+            shareint.setType("image/*");
+            shareint.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+            shareint.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        startActivity(Intent.createChooser(shareint, "share image"));
     }
 
 }

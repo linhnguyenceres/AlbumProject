@@ -43,9 +43,9 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
         switch (position) {
             case 1:
                 return new FragmentListImage(listFolderImage,ctx);
+//            case 2:
+//                return new FragmentCreateStory();
             case 2:
-                return new FragmentCreateStory();
-            case 3:
                 return new FragmentSetting();
             default:
                 return new FragmentImage(listImageData);
@@ -54,7 +54,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 3;
     }
 
     @Override
@@ -67,10 +67,10 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 title = "Tập ảnh";
                 break;
+//            case 2:
+//                title = "Tạo story";
+//                break;
             case 2:
-                title = "Tạo story";
-                break;
-            case 3:
                 title = "Cài đặt";
                 break;
         }
