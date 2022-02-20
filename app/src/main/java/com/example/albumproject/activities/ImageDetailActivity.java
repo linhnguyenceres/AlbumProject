@@ -116,52 +116,13 @@ public class ImageDetailActivity extends Activity {
     }
 
     private void alertView(String message, Drawable icon, String title) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle(title)
-                .setIcon(icon)
-                .setMessage(message)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialoginterface, int i) {
-//                        String path = urlPath;
-//                        File file = new File(path);
-//                        if (ContextCompat.checkSelfPermission(ImageDetailActivity.this
-//                                , Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                            file.delete();
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        }
-
-//                        File file = new File(url);
-//                        if(file.exists()){
-//                            deleteFile(url);
-//                            Log.e("filedel", "file Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }
-
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
                         File file = new File(url);
-//                        Log.e("filePath", file.getAbsolutePath());
-//                        if (file.exists()) {
-//                            file.delete();
-//                            deleteDirectory(file);
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        } else {
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
-//                        if(deleteDirectory(file)){
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
                         final String where = MediaStore.MediaColumns.DATA + "=?";
                         final String[] selectionArgs = new String[]{
                                 file.getAbsolutePath()
@@ -169,8 +130,73 @@ public class ImageDetailActivity extends Activity {
                         final ContentResolver contentResolver = getContentResolver();
                         final Uri filesUri = MediaStore.Files.getContentUri("external");
                         contentResolver.delete(filesUri, where, selectionArgs);
-                    }
-                }).show();
+                        ImageDetailActivity.super.onBackPressed();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(title)
+                .setIcon(icon)
+                .setMessage(message)
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+//                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+////                    public void onClick(DialogInterface dialoginterface, int i) {
+//////                        String path = urlPath;
+//////                        File file = new File(path);
+//////                        if (ContextCompat.checkSelfPermission(ImageDetailActivity.this
+//////                                , Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+//////                            file.delete();
+//////                            if (file.delete()) {
+//////                                Log.e("filedel", "file Deleted :");
+//////                            } else {
+//////                                Log.e("filedel", "file  not Deleted :");
+//////                            }
+//////                        }
+////
+//////                        File file = new File(url);
+//////                        if(file.exists()){
+//////                            deleteFile(url);
+//////                            Log.e("filedel", "file Deleted :");
+//////                        }else{
+//////                            Log.e("filedel", "file  not Deleted :");
+//////                        }
+////
+////                        File file = new File(url);
+//////                        Log.e("filePath", file.getAbsolutePath());
+//////                        if (file.exists()) {
+//////                            file.delete();
+//////                            deleteDirectory(file);
+//////                            if (file.delete()) {
+//////                                Log.e("filedel", "file Deleted :");
+//////                            } else {
+//////                                Log.e("filedel", "file  not Deleted :");
+//////                            }
+//////                        } else {
+//////                            Log.e("filedel", "file  not Exists :");
+//////                        }
+////
+//////                        if(deleteDirectory(file)){
+//////                            Log.e("filedel", "file  not Deleted :");
+//////                        }else{
+//////                            Log.e("filedel", "file  not Exists :");
+//////                        }
+////
+////                        final String where = MediaStore.MediaColumns.DATA + "=?";
+////                        final String[] selectionArgs = new String[]{
+////                                file.getAbsolutePath()
+////                        };
+////                        final ContentResolver contentResolver = getContentResolver();
+////                        final Uri filesUri = MediaStore.Files.getContentUri("external");
+////                        contentResolver.delete(filesUri, where, selectionArgs);
+////                    }
+//                }).show();
     }
 
     static public boolean deleteDirectory(File path) {
