@@ -54,7 +54,6 @@ public class ImageDetailActivity extends Activity {
     private static Context mContext;
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +121,7 @@ public class ImageDetailActivity extends Activity {
                 .setMessage(message)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialoginterface, int i) {
+                        deletePhoto(url);
 //                        String path = urlPath;
 //                        File file = new File(path);
 //                        if (ContextCompat.checkSelfPermission(ImageDetailActivity.this
@@ -142,7 +142,7 @@ public class ImageDetailActivity extends Activity {
 //                            Log.e("filedel", "file  not Deleted :");
 //                        }
 
-                        File file = new File(url);
+//                        File file = new File(url);
 //                        Log.e("filePath", file.getAbsolutePath());
 //                        if (file.exists()) {
 //                            file.delete();
@@ -162,13 +162,13 @@ public class ImageDetailActivity extends Activity {
 //                            Log.e("filedel", "file  not Exists :");
 //                        }
 
-                        final String where = MediaStore.MediaColumns.DATA + "=?";
-                        final String[] selectionArgs = new String[]{
-                                file.getAbsolutePath()
-                        };
-                        final ContentResolver contentResolver = getContentResolver();
-                        final Uri filesUri = MediaStore.Files.getContentUri("external");
-                        contentResolver.delete(filesUri, where, selectionArgs);
+//                        final String where = MediaStore.MediaColumns.DATA + "=?";
+//                        final String[] selectionArgs = new String[]{
+//                                file.getAbsolutePath()
+//                        };
+//                        final ContentResolver contentResolver = getContentResolver();
+//                        final Uri filesUri = MediaStore.Files.getContentUri("external");
+//                        contentResolver.delete(filesUri, where, selectionArgs);
                     }
                 }).show();
     }
@@ -214,6 +214,20 @@ public class ImageDetailActivity extends Activity {
 
         startActivity(Intent.createChooser(shareint, "share image"));
     }
+
+    private Boolean deletePhoto(String fileName) {
+        Boolean result = false;
+        try {
+            deleteFile(fileName);
+            result = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = false;
+        }
+        return result;
+    }
+
+
 
 }
 
