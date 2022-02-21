@@ -1,7 +1,9 @@
 package com.example.albumproject.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.albumproject.R;
+import com.example.albumproject.activities.DetailListImageActivity;
+import com.example.albumproject.activities.MainActivity;
+import com.example.albumproject.activities.SearchActivity;
 import com.example.albumproject.models.FolderMainModel;
 import com.squareup.picasso.Picasso;
 
@@ -40,18 +45,20 @@ public class FragmentListImage extends Fragment {
         this.ctx = ctx;
     }
 
-    private static final String TAG = "RecyclerViewFragment";
+    private static final String TAG = "FragmentListImage";
 
     protected RecyclerView mRecyclerView;
     protected CustomAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected String[] mDataset;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        initDataset();
+    public void changeData(ArrayList<FolderMainModel> list){
+        this.list = list;
+        this.mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -59,9 +66,7 @@ public class FragmentListImage extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list_image, container, false);
         rootView.setTag(TAG);
-
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewListImage);
-
         mAdapter = new CustomAdapter(this.list);
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new GridLayoutManager(getActivity(), 2);
@@ -70,26 +75,6 @@ public class FragmentListImage extends Fragment {
         return rootView;
     }
 
-    //fake data
-    private void initDataset() {
-        mDataset = new String[16];
-        mDataset[0] = "Age Calculator";
-        mDataset[1] = "Anti Rabies Vaccine Schedule";
-        mDataset[2] = "Body Mass Index";
-        mDataset[3] = "Creatinine Clearance";
-        mDataset[4] = "Fluid Resuscitation in Burns";
-        mDataset[5] = "Gestational Age from LMP";
-        mDataset[6] = "Gestational Age from scan";
-        mDataset[7] = "Glomerular Filtration Rate";
-        mDataset[8] = "Temperature conversion";
-        mDataset[9] = "Arm Fat Index";
-        mDataset[10] = "Basal Metabolic Rate";
-        mDataset[11] = "Body Adiposity Index";
-        mDataset[12] = "Body Surface Area";
-        mDataset[13] = "Fractional Excretion of Sodium";
-        mDataset[14] = "Mean Arterial Pressure";
-        mDataset[15] = "Plasma Osmolality";
-    }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
         private static final String TAG = "CustomAdapter";
@@ -106,10 +91,16 @@ public class FragmentListImage extends Fragment {
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getActivity(), "Item " + getAdapterPosition() + " clicked.", Toast.LENGTH_SHORT).show();
-                        Fragment fragment = null;
-                        fragment = new FragmentDetailListImage(ctx,mDataSet.get(getAdapterPosition()));
-                        replaceFragment(fragment);
+//                        Toast.makeText(getActivity(), "Item " + getAdapterPosition()
+//                                + " clicked.", Toast.LENGTH_SHORT).show();
+//                        Fragment fragment = null;
+//                        fragment = new FragmentDetailListImage(ctx,mDataSet.get(getAdapterPosition()));
+//                        replaceFragment(fragment);
+
+                        FolderMainModel details =  mDataSet.get(getAdapterPosition());
+                        Intent i = new Intent(getActivity(), DetailListImageActivity.class);
+                        i.putExtra("listDataFolderImage", (FolderMainModel) details);
+                        startActivity(i);
                     }
                 });
 
@@ -141,10 +132,11 @@ public class FragmentListImage extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-            Log.d(TAG, "Element " + position + " set.");
+//            Log.d(TAG, "Element " + position + " set.");
             final FolderMainModel folder = mDataSet.get(position);
 
-            Picasso.with(ctx).load("file://" + folder.getFirstPic()).fit().centerCrop().into(viewHolder.getImageView());
+            Picasso.with(ctx).load("file://" + folder.getFirstPic()).fit().centerCrop()
+                    .into(viewHolder.getImageView());
 
             viewHolder.getTextView().setText(folder.getFolderName());
 
@@ -157,10 +149,10 @@ public class FragmentListImage extends Fragment {
         }
     }
 
-    public void replaceFragment(Fragment someFragment) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.layoutFullScreen, someFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
+//    public void replaceFragment(Fragment someFragment) {
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//        transaction.replace(R.id.layoutFullScreen, someFragment);
+//        transaction.addToBackStack(null);
+//        transaction.commit();
+//    }
 }

@@ -26,6 +26,9 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
     public MyPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
+    FragmentImage tab;
+    FragmentListImage tab1;
+    FragmentSetting tab2;
 
     public MyPagerAdapter(Context ctx,@NonNull FragmentManager fm, int behavior,
                           ArrayList<FileMainModel> listImageData,
@@ -36,25 +39,40 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
         this.listImageData = listImageData;
         this.listLibraryImage = listLibraryImage;
         this.listFolderImage = listFolderImage;
+
+        tab = new FragmentImage(listImageData);
+        tab1 = new FragmentListImage(listFolderImage,ctx);
+        tab2 = new FragmentSetting();
     }
+
+    public void setNewData(ArrayList<FileMainModel> listImageData,
+                       ArrayList<FileMainModel> listLibraryImage,
+                       ArrayList<FolderMainModel> listFolderImage){
+        this.listImageData = listImageData;
+        this.listLibraryImage = listLibraryImage;
+        this.listFolderImage = listFolderImage;
+        tab.changeData(this.listImageData);
+        tab1.changeData(this.listFolderImage);
+    }
+
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 1:
-                return new FragmentListImage(listFolderImage,ctx);
+                return tab1;
+//            case 2:
+//                return new FragmentCreateStory();
             case 2:
-                return new FragmentCreateStory();
-            case 3:
-                return new FragmentSetting();
+                return tab2;
             default:
-                return new FragmentImage(listImageData);
+                return tab;
         }
     }
 
     @Override
     public int getCount() {
-        return 4;
+        return 3;
     }
 
     @Override
@@ -67,10 +85,10 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 title = "Tập ảnh";
                 break;
+//            case 2:
+//                title = "Tạo story";
+//                break;
             case 2:
-                title = "Tạo story";
-                break;
-            case 3:
                 title = "Cài đặt";
                 break;
         }

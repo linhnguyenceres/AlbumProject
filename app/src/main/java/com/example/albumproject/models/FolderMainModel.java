@@ -1,6 +1,8 @@
 package com.example.albumproject.models;
 
-public class FolderMainModel {
+import java.io.Serializable;
+
+public class FolderMainModel  implements Serializable {
     private  String path;
     private  String FolderName;
     private int numberOfPics = 0;

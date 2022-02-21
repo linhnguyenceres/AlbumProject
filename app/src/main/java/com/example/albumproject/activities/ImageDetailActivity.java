@@ -1,46 +1,30 @@
 package com.example.albumproject.activities;
 
-import android.Manifest;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.view.TouchDelegate;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
-
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-
-import com.example.albumproject.BuildConfig;
+import com.dsphotoeditor.sdk.activity.DsPhotoEditorActivity;
+import com.dsphotoeditor.sdk.utils.DsPhotoEditorConstants;
 import com.example.albumproject.R;
 import com.example.albumproject.customs.TouchImageView;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Objects;
 
 public class ImageDetailActivity extends Activity {
     View btnBack;
@@ -94,57 +78,14 @@ public class ImageDetailActivity extends Activity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                try {
-//                    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-//                    sharingIntent.setType("image/*");
-//                    sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(urlPath));
-//                    startActivity(Intent.createChooser(sharingIntent, "Share Image:"));
-//                } catch (Exception e) {
-//                    Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    Log.e("ERROR", e.getMessage());
-//                }
-
-//                Intent share = new Intent(Intent.ACTION_SEND);
-//                share.setType("image/*");
-////                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-////                url.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-////                File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
-////                try {
-////                    f.createNewFile();
-////                    FileOutputStream fo = new FileOutputStream(f);
-////                    fo.write(bytes.toByteArray());
-////                } catch (IOException e) {
-////                    e.printStackTrace();
-////                }
-//                share.putExtra(Intent.EXTRA_STREAM, Uri.parse(urlPath));
-//                startActivity(Intent.createChooser(share, "Share Image"));
-                //                File file = new File(url);
-//                Uri uri;// w w w.j  a v a 2  s. co m
-//                if (Build.VERSION.SDK_INT >= 24) {
-//                    uri = FileProvider.getUriForFile(mContext,
-//                            BuildConfig.APPLICATION_ID + ".provider", file);
-//                } else {
-//                    uri = Uri.fromFile(file);
-//                }
-
-                try {
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    File file1 = new File(url);
-                    String abs = file1.getAbsolutePath();
-                    Uri uri = Uri.parse("file:/" + abs);
-                    intent.putExtra(Intent.EXTRA_STREAM, uri);
-                    intent.setType("image/*");
-                    startActivity(Intent.createChooser(intent, "Share image"));
-                } catch (Exception e) {
-                    Log.e("ERROR", e.getMessage());
-                }
+                image();
             }
         });
 
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(ImageDetailActivity.this, EditImageActivity.class));
+                pickImage();
             }
         });
 
@@ -157,52 +98,13 @@ public class ImageDetailActivity extends Activity {
     }
 
     private void alertView(String message, Drawable icon, String title) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle(title)
-                .setIcon(icon)
-                .setMessage(message)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialoginterface, int i) {
-//                        String path = urlPath;
-//                        File file = new File(path);
-//                        if (ContextCompat.checkSelfPermission(ImageDetailActivity.this
-//                                , Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                            file.delete();
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        }
-
-//                        File file = new File(url);
-//                        if(file.exists()){
-//                            deleteFile(url);
-//                            Log.e("filedel", "file Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }
-
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
                         File file = new File(url);
-//                        Log.e("filePath", file.getAbsolutePath());
-//                        if (file.exists()) {
-//                            file.delete();
-//                            deleteDirectory(file);
-//                            if (file.delete()) {
-//                                Log.e("filedel", "file Deleted :");
-//                            } else {
-//                                Log.e("filedel", "file  not Deleted :");
-//                            }
-//                        } else {
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
-//                        if(deleteDirectory(file)){
-//                            Log.e("filedel", "file  not Deleted :");
-//                        }else{
-//                            Log.e("filedel", "file  not Exists :");
-//                        }
-
                         final String where = MediaStore.MediaColumns.DATA + "=?";
                         final String[] selectionArgs = new String[]{
                                 file.getAbsolutePath()
@@ -210,24 +112,64 @@ public class ImageDetailActivity extends Activity {
                         final ContentResolver contentResolver = getContentResolver();
                         final Uri filesUri = MediaStore.Files.getContentUri("external");
                         contentResolver.delete(filesUri, where, selectionArgs);
-                    }
-                }).show();
-    }
+                        ImageDetailActivity.super.onBackPressed();
+                        break;
 
-    static public boolean deleteDirectory(File path) {
-        if (path.exists()) {
-            File[] files = path.listFiles();
-            for (int i = 0; i < Objects.requireNonNull(files).length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteDirectory(files[i]);
-                } else {
-                    files[i].delete();
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
                 }
             }
-        }
-        return (path.delete());
+        };
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(title)
+                .setIcon(icon)
+                .setMessage(message)
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
+
+    private void image() {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
+        BitmapDrawable drawable = (BitmapDrawable) imViewedImage.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+
+        File f = new File(getExternalCacheDir() + "/" + getResources().getString(R.string.app_name) + ".png");
+        Intent shareint;
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            shareint = new Intent(Intent.ACTION_SEND);
+            shareint.setType("image/*");
+            shareint.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+            shareint.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        startActivity(Intent.createChooser(shareint, "share image"));
+    }
+
+    private void pickImage(){
+        Intent intent = new Intent(ImageDetailActivity.this, DsPhotoEditorActivity.class);
+        intent.setData(Uri.parse(urlPath));
+        intent.putExtra(DsPhotoEditorConstants.DS_PHOTO_EDITOR_OUTPUT_DIRECTORY, "Images");
+        intent.putExtra(DsPhotoEditorConstants.DS_TOOL_BAR_BACKGROUND_COLOR, Color.parseColor("#FF6200EE"));
+        intent.putExtra(DsPhotoEditorConstants.DS_MAIN_BACKGROUND_COLOR, Color.parseColor("#FFFFFF"));
+        intent.putExtra(DsPhotoEditorConstants.DS_PHOTO_EDITOR_TOOLS_TO_HIDE, new int[]{
+                DsPhotoEditorActivity.TOOL_WARMTH, DsPhotoEditorActivity.TOOL_PIXELATE
+        });
+        startActivity(intent);
+    }
 }
 
 
