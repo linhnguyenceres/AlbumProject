@@ -66,4 +66,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:26.1.0'
 
     implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
+
+    // dexter
+    implementation "com.karumi:dexter:6.2.3"
 }
