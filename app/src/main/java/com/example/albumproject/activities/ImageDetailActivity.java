@@ -156,7 +156,7 @@ public class ImageDetailActivity extends Activity {
             throw new RuntimeException(e);
         }
 
-        startActivity(Intent.createChooser(shareint, "share image"));
+        startActivity(Intent.createChooser(shareint, "Chia sẻ hình ảnh"));
     }
 
     private void pickImage(){

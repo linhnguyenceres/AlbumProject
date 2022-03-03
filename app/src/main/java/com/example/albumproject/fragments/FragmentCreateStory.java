@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.albumproject.R;
@@ -35,14 +36,14 @@ public class FragmentCreateStory extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_list_image, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_create_story, container, false);
         rootView.setTag(TAG);
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerViewListImage);
 
         mAdapter = new FragmentCreateStory.CustomCreateStoryAdapter(mDataset);
         mRecyclerView.setAdapter(mAdapter);
-        mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         return rootView;
@@ -50,23 +51,8 @@ public class FragmentCreateStory extends Fragment {
 
     //fake data
     private void initDataset() {
-        mDataset = new String[16];
+        mDataset = new String[1];
         mDataset[0] = "Age Calculator";
-        mDataset[1] = "Anti Rabies Vaccine Schedule";
-        mDataset[2] = "Body Mass Index";
-        mDataset[3] = "Creatinine Clearance";
-        mDataset[4] = "Fluid Resuscitation in Burns";
-        mDataset[5] = "Gestational Age from LMP";
-        mDataset[6] = "Gestational Age from scan";
-        mDataset[7] = "Glomerular Filtration Rate";
-        mDataset[8] = "Temperature conversion";
-        mDataset[9] = "Arm Fat Index";
-        mDataset[10] = "Basal Metabolic Rate";
-        mDataset[11] = "Body Adiposity Index";
-        mDataset[12] = "Body Surface Area";
-        mDataset[13] = "Fractional Excretion of Sodium";
-        mDataset[14] = "Mean Arterial Pressure";
-        mDataset[15] = "Plasma Osmolality";
     }
 
     public class CustomCreateStoryAdapter extends RecyclerView.Adapter<FragmentCreateStory.CustomCreateStoryAdapter.ViewHolder> {
@@ -105,7 +91,7 @@ public class FragmentCreateStory extends Fragment {
         public FragmentCreateStory.CustomCreateStoryAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
             // Create a new view.
             View v = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.item_list_image, viewGroup, false);
+                    .inflate(R.layout.item_story, viewGroup, false);
 
             return new FragmentCreateStory.CustomCreateStoryAdapter.ViewHolder(v);
         }

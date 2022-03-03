@@ -26,11 +26,13 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
     public MyPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
+
     FragmentImage tab;
     FragmentListImage tab1;
-    FragmentSetting tab2;
+    FragmentCreateStory tab2;
+    FragmentSetting tab3;
 
-    public MyPagerAdapter(Context ctx,@NonNull FragmentManager fm, int behavior,
+    public MyPagerAdapter(Context ctx, @NonNull FragmentManager fm, int behavior,
                           ArrayList<FileMainModel> listImageData,
                           ArrayList<FileMainModel> listLibraryImage,
                           ArrayList<FolderMainModel> listFolderImage) {
@@ -41,13 +43,14 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
         this.listFolderImage = listFolderImage;
 
         tab = new FragmentImage(listImageData);
-        tab1 = new FragmentListImage(listFolderImage,ctx);
-        tab2 = new FragmentSetting();
+        tab1 = new FragmentListImage(listFolderImage, ctx);
+        tab2 = new FragmentCreateStory();
+        tab3 = new FragmentSetting();
     }
 
     public void setNewData(ArrayList<FileMainModel> listImageData,
-                       ArrayList<FileMainModel> listLibraryImage,
-                       ArrayList<FolderMainModel> listFolderImage){
+                           ArrayList<FileMainModel> listLibraryImage,
+                           ArrayList<FolderMainModel> listFolderImage) {
         this.listImageData = listImageData;
         this.listLibraryImage = listLibraryImage;
         this.listFolderImage = listFolderImage;
@@ -61,10 +64,10 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
         switch (position) {
             case 1:
                 return tab1;
-//            case 2:
-//                return new FragmentCreateStory();
             case 2:
                 return tab2;
+            case 3:
+                return tab3;
             default:
                 return tab;
         }
@@ -72,7 +75,7 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -85,10 +88,10 @@ public class MyPagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 title = "Tập ảnh";
                 break;
-//            case 2:
-//                title = "Tạo story";
-//                break;
             case 2:
+                title = "Tạo story";
+                break;
+            case 3:
                 title = "Cài đặt";
                 break;
         }
