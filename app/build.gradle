@@ -69,6 +69,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
 
 
+
     // DS Photo Editor SDK
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation files('libs/ds-photo-editor-sdk.aar')
